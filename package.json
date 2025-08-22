@@ -1,0 +1,16 @@
+{
+  "name": "giraffe-sdk-test",
+  "version": "1.0.0",
+  "description": "Test app for Giraffe SDK integration",
+  "main": "index.js",
+  "scripts": {
+    "dev": "npx http-server -p 3001 -c-1",
+    "start": "npx http-server -p 3001"
+  },
+  "dependencies": {
+    "@gi-nx/iframe-sdk": "latest"
+  },
+  "devDependencies": {
+    "http-server": "^14.1.1"
+  }
+}
