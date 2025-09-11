@@ -40,16 +40,47 @@ document.addEventListener('DOMContentLoaded', async function() {
 function displayOutput(elementId, data) {
     const element = document.getElementById(elementId);
     element.textContent = JSON.stringify(data, null, 2);
+    
+    // Add copy button if it doesn't exist
+    if (!element.parentNode.querySelector('.copy-btn')) {
+        const copyBtn = document.createElement('button');
+        copyBtn.className = 'copy-btn';
+        copyBtn.style.cssText = 'padding: 8px; background: #28a745; border: none; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center;';
+        
+        // Create the copy icon
+        const copyIcon = document.createElement('img');
+        copyIcon.src = 'https://static.thenounproject.com/png/361082-200.png';
+        copyIcon.style.cssText = 'width: 16px; height: 16px; filter: brightness(0) invert(1);';
+        copyIcon.alt = 'Copy';
+        copyBtn.appendChild(copyIcon);
+        
+        copyBtn.onclick = () => {
+            navigator.clipboard.writeText(element.textContent).then(() => {
+                copyIcon.style.filter = 'brightness(0) saturate(100%) invert(27%) sepia(51%) saturate(2878%) hue-rotate(346deg) brightness(104%) contrast(97%)'; // Green checkmark color
+                copyIcon.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAxNiAxNiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEzLjMzMzMgNEw2IDExLjMzMzNMMi42NjY2NyA4IiBzdHJva2U9IiNmZmZmZmYiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+Cjwvc3ZnPgo=';
+                setTimeout(() => {
+                    copyIcon.src = 'https://static.thenounproject.com/png/361082-200.png';
+                    copyIcon.style.filter = 'brightness(0) invert(1)';
+                }, 2000);
+            }).catch(err => {
+                console.error('Failed to copy: ', err);
+                copyIcon.style.filter = 'brightness(0) saturate(100%) invert(17%) sepia(94%) saturate(7151%) hue-rotate(359deg) brightness(95%) contrast(118%)'; // Red X color
+                copyIcon.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAxNiAxNiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDRMMTAgNkw4IDRMMTYgNCIgc3Ryb2tlPSIjZmZmZmZmIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPgo8cGF0aCBkPSJNMTIgMTJMMTAgMTBMMTggMTIiIHN0cm9rZT0iI2ZmZmZmZiIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz4KPC9zdmc+Cg==';
+                setTimeout(() => {
+                    copyIcon.src = 'https://static.thenounproject.com/png/361082-200.png';
+                    copyIcon.style.filter = 'brightness(0) invert(1)';
+                }, 2000);
+            });
+        };
+        element.parentNode.appendChild(copyBtn);
+    }
 }
 
 // Project Information Functions
 window.getCurrentProject = async function() {
     try {
         const project = giraffeState.get('project');
-        displayOutput('projectOutput', {
-            title: 'Current Project',
-            data: project
-        });
+        displayOutput('projectOutput', project);
     } catch (error) {
         displayOutput('projectOutput', { error: error.message });
     }
@@ -58,11 +89,7 @@ window.getCurrentProject = async function() {
 window.getAllProjects = async function() {
     try {
         const projects = giraffeState.get('projects');
-        displayOutput('projectOutput', {
-            title: 'All Projects',
-            count: projects?.features?.length || 0,
-            data: projects
-        });
+        displayOutput('projectOutput', projects);
     } catch (error) {
         displayOutput('projectOutput', { error: error.message });
     }
@@ -88,14 +115,15 @@ window.getCurrentProjectBoundary = async function() {
             feature => feature.properties.defaultBoundary === true
         );
 
-        displayOutput('projectOutput', {
-            title: 'Current Project Boundary',
+        const result = {
             currentProjectId: currentProject.id,
             foundBoundary: !!currentProjectBoundary,
             defaultBoundary: !!defaultBoundary,
             boundaryGeometry: currentProjectBoundary?.geometry || defaultBoundary?.geometry,
             boundaryProperties: currentProjectBoundary?.properties || defaultBoundary?.properties
-        });
+        };
+        
+        displayOutput('projectOutput', result);
     } catch (error) {
         displayOutput('projectOutput', { error: error.message });
     }
@@ -105,10 +133,7 @@ window.getCurrentProjectBoundary = async function() {
 window.getMapView = async function() {
     try {
         const mapView = giraffeState.get('mapView');
-        displayOutput('mapOutput', {
-            title: 'Map View',
-            data: mapView
-        });
+        displayOutput('mapOutput', mapView);
     } catch (error) {
         displayOutput('mapOutput', { error: error.message });
     }
@@ -117,11 +142,7 @@ window.getMapView = async function() {
 window.getSelectedFeatures = async function() {
     try {
         const selected = await rpc.invoke('getSelectedFeatures', []);
-        displayOutput('mapOutput', {
-            title: 'Selected Features',
-            count: selected?.features?.length || 0,
-            data: selected
-        });
+        displayOutput('mapOutput', selected);
     } catch (error) {
         displayOutput('mapOutput', { error: error.message });
     }
@@ -131,11 +152,7 @@ window.getSelectedFeatures = async function() {
 window.getProjectLayers = async function() {
     try {
         const layers = giraffeState.get('projectLayers');
-        displayOutput('layersOutput', {
-            title: 'Project Layers',
-            count: layers?.length || 0,
-            data: layers
-        });
+        displayOutput('layersOutput', layers);
     } catch (error) {
         displayOutput('layersOutput', { error: error.message });
     }
@@ -144,11 +161,7 @@ window.getProjectLayers = async function() {
 window.getRawSections = async function() {
     try {
         const rawSections = giraffeState.get('rawSections');
-        displayOutput('layersOutput', {
-            title: 'Raw Sections',
-            count: rawSections?.features?.length || 0,
-            data: rawSections
-        });
+        displayOutput('layersOutput', rawSections);
     } catch (error) {
         displayOutput('layersOutput', { error: error.message });
     }
@@ -158,11 +171,7 @@ window.getRawSections = async function() {
 window.getBakedSections = async function() {
     try {
         const bakedSections = giraffeState.get('bakedSections');
-        displayOutput('layersOutput', {
-            title: 'Baked Sections',
-            count: bakedSections?.features?.length || 0,
-            data: bakedSections
-        });
+        displayOutput('layersOutput', bakedSections);
     } catch (error) {
         displayOutput('layersOutput', { error: error.message });
     }
@@ -171,10 +180,7 @@ window.getBakedSections = async function() {
 window.getLayerTree = async function() {
     try {
         const layerTree = giraffeState.get('layerTree');
-        displayOutput('layersOutput', {
-            title: 'Layer Tree',
-            data: layerTree
-        });
+        displayOutput('layersOutput', layerTree);
     } catch (error) {
         displayOutput('layersOutput', { error: error.message });
     }
@@ -188,10 +194,7 @@ window.exploreLayerTypes = async function() {
         const bakedSections = giraffeState.get('bakedSections');
         
         if (!layers || layers.length === 0) {
-            displayOutput('layersOutput', {
-                title: 'Layer Types Exploration',
-                error: 'No project layers found. Try adding some layers to your project first.'
-            });
+            displayOutput('layersOutput', { error: 'No project layers found. Try adding some layers to your project first.' });
             return;
         }
 
@@ -242,8 +245,7 @@ window.exploreLayerTypes = async function() {
             }
         });
 
-        displayOutput('layersOutput', {
-            title: 'Layer Types & Data Layer Identification',
+        const result = {
             totalLayers: layers.length,
             rawSectionsCount: rawSections?.features?.length || 0,
             bakedSectionsCount: bakedSections?.features?.length || 0,
@@ -270,7 +272,9 @@ window.exploreLayerTypes = async function() {
                     typeGroups[a].length > typeGroups[b].length ? a : b, Object.keys(typeGroups)[0]
                 )
             }
-        });
+        };
+        
+        displayOutput('layersOutput', result);
     } catch (error) {
         displayOutput('layersOutput', { error: error.message });
     }
@@ -282,10 +286,7 @@ window.analyzeDataLayers = async function() {
         const layers = giraffeState.get('projectLayers');
         
         if (!layers || layers.length === 0) {
-            displayOutput('layersOutput', {
-                title: 'Data Layer Analysis',
-                error: 'No project layers found. Try adding some layers to your project first.'
-            });
+            displayOutput('layersOutput', { error: 'No project layers found. Try adding some layers to your project first.' });
             return;
         }
 
@@ -347,8 +348,7 @@ window.analyzeDataLayers = async function() {
             layersWithComplexStyle: deepAnalysis.filter(l => l.hasComplexStyle)
         };
 
-        displayOutput('layersOutput', {
-            title: 'Data Layer Deep Analysis',
+        const result = {
             totalLayers: layers.length,
             
             // Type distribution
@@ -382,13 +382,12 @@ window.analyzeDataLayers = async function() {
             
             // Full analysis for inspection
             deepAnalysis: deepAnalysis
-        });
+        };
+        
+        displayOutput('layersOutput', result);
         
     } catch (error) {
-        displayOutput('layersOutput', { 
-            title: 'Data Layer Deep Analysis',
-            error: error.message 
-        });
+        displayOutput('layersOutput', { error: error.message });
     }
 };
 
@@ -397,16 +396,9 @@ window.testDrawingLayerActivation = async function() {
     try {
         // Try to activate drawing layer and see what happens
         const result = await rpc.invoke('activateDrawingLayer', []);
-        displayOutput('layersOutput', {
-            title: 'Drawing Layer Activation Test',
-            result: result,
-            message: 'Successfully called activateDrawingLayer'
-        });
+        displayOutput('layersOutput', result);
     } catch (error) {
-        displayOutput('layersOutput', { 
-            title: 'Drawing Layer Activation Test',
-            error: error.message 
-        });
+        displayOutput('layersOutput', { error: error.message });
     }
 };
 
@@ -415,10 +407,7 @@ window.testLayerContents = async function() {
     try {
         const layers = giraffeState.get('projectLayers');
         if (!layers || layers.length === 0) {
-            displayOutput('layersOutput', {
-                title: 'Layer Contents Test',
-                error: 'No layers available to test'
-            });
+            displayOutput('layersOutput', { error: 'No layers available to test' });
             return;
         }
 
@@ -427,27 +416,22 @@ window.testLayerContents = async function() {
         const layerName = firstLayer.layer_full?.name;
         
         if (!layerName) {
-            displayOutput('layersOutput', {
-                title: 'Layer Contents Test',
-                error: 'First layer has no name'
-            });
+            displayOutput('layersOutput', { error: 'First layer has no name' });
             return;
         }
 
         const contents = await rpc.invoke('getLayerContents', [layerName]);
-        displayOutput('layersOutput', {
-            title: 'Layer Contents Test',
+        const result = {
             layerName: layerName,
             layerType: firstLayer.layer_full?.layer_type,
             contentsType: typeof contents,
             hasFeatures: contents?.features?.length || 0,
             contents: contents
-        });
+        };
+        
+        displayOutput('layersOutput', result);
     } catch (error) {
-        displayOutput('layersOutput', { 
-            title: 'Layer Contents Test',
-            error: error.message 
-        });
+        displayOutput('layersOutput', { error: error.message });
     }
 };
 
@@ -457,14 +441,15 @@ window.checkSelectedForBoundary = async function() {
         const selected = await rpc.invoke('getSelectedFeatures');
         const feature = selected.features[0];
         
-        displayOutput('boundaryOutput', {
-            title: 'Selected Feature Analysis',
+        const result = {
             hasFeature: !!feature,
             hasDefaultBoundary: feature?.properties?.defaultBoundary,
             properties: feature?.properties,
             geometryType: feature?.geometry?.type,
             coordinatesCount: feature?.geometry?.coordinates?.length
-        });
+        };
+        
+        displayOutput('boundaryOutput', result);
     } catch (error) {
         displayOutput('boundaryOutput', { error: error.message });
     }
@@ -495,10 +480,7 @@ window.exploreAllStates = async function() {
             }
         });
         
-        displayOutput('boundaryOutput', {
-            title: 'All Available State Keys',
-            data: stateData
-        });
+        displayOutput('boundaryOutput', stateData);
     } catch (error) {
         displayOutput('boundaryOutput', { error: error.message });
     }
@@ -507,10 +489,7 @@ window.exploreAllStates = async function() {
 window.getMapContent = async function() {
     try {
         const mapContent = giraffeState.get('mapContent');
-        displayOutput('boundaryOutput', {
-            title: 'Map Content',
-            data: mapContent
-        });
+        displayOutput('boundaryOutput', mapContent);
     } catch (error) {
         displayOutput('boundaryOutput', { error: error.message });
     }
@@ -853,10 +832,7 @@ let buildingFootprintsLayer = null;
 window.activateViewportLayer = async function() {
     try {
         if (buildingFootprintsLayer && buildingFootprintsLayer.isActive) {
-            displayOutput('viewportOutput', {
-                title: 'Viewport Layer',
-                message: 'Building footprints layer is already active'
-            });
+            displayOutput('viewportOutput', { message: 'Building footprints layer is already active' });
             return;
         }
         
@@ -874,53 +850,39 @@ window.activateViewportLayer = async function() {
         
         await buildingFootprintsLayer.activate();
         
-        displayOutput('viewportOutput', {
-            title: 'Viewport Layer Activated',
+        const result = {
             layerName: buildingFootprintsLayer.layerName,
             serviceUrl: buildingFootprintsLayer.serviceUrl,
             message: 'Charlotte zoning layer is now loading features based on viewport'
-        });
+        };
+        
+        displayOutput('viewportOutput', result);
         
     } catch (error) {
-        displayOutput('viewportOutput', { 
-            title: 'Viewport Layer Activation Error',
-            error: error.message 
-        });
+        displayOutput('viewportOutput', { error: error.message });
     }
 };
 
 window.deactivateViewportLayer = async function() {
     try {
         if (!buildingFootprintsLayer || !buildingFootprintsLayer.isActive) {
-            displayOutput('viewportOutput', {
-                title: 'Viewport Layer',
-                message: 'No active viewport layer to deactivate'
-            });
+            displayOutput('viewportOutput', { message: 'No active viewport layer to deactivate' });
             return;
         }
         
         await buildingFootprintsLayer.deactivate();
         
-        displayOutput('viewportOutput', {
-            title: 'Viewport Layer Deactivated',
-            message: 'Charlotte zoning layer has been removed'
-        });
+        displayOutput('viewportOutput', { message: 'Charlotte zoning layer has been removed' });
         
     } catch (error) {
-        displayOutput('viewportOutput', { 
-            title: 'Viewport Layer Deactivation Error',
-            error: error.message 
-        });
+        displayOutput('viewportOutput', { error: error.message });
     }
 };
 
 window.refreshViewportLayer = async function() {
     try {
         if (!buildingFootprintsLayer || !buildingFootprintsLayer.isActive) {
-            displayOutput('viewportOutput', {
-                title: 'Viewport Layer Refresh',
-                error: 'No active viewport layer to refresh'
-            });
+            displayOutput('viewportOutput', { error: 'No active viewport layer to refresh' });
             return;
         }
         
@@ -928,16 +890,10 @@ window.refreshViewportLayer = async function() {
         buildingFootprintsLayer.lastBounds = null;
         await buildingFootprintsLayer.loadFeaturesForCurrentViewport();
         
-        displayOutput('viewportOutput', {
-            title: 'Viewport Layer Refreshed',
-            message: 'Features reloaded for current viewport'
-        });
+        displayOutput('viewportOutput', { message: 'Features reloaded for current viewport' });
         
     } catch (error) {
-        displayOutput('viewportOutput', { 
-            title: 'Viewport Layer Refresh Error',
-            error: error.message 
-        });
+        displayOutput('viewportOutput', { error: error.message });
     }
 };
 
@@ -952,16 +908,10 @@ window.getViewportLayerStatus = function() {
             lastBounds: buildingFootprintsLayer?.lastBounds || null
         };
         
-        displayOutput('viewportOutput', {
-            title: 'Viewport Layer Status',
-            status: status
-        });
+        displayOutput('viewportOutput', status);
         
     } catch (error) {
-        displayOutput('viewportOutput', { 
-            title: 'Viewport Layer Status Error',
-            error: error.message 
-        });
+        displayOutput('viewportOutput', { error: error.message });
     }
 };
 
@@ -1032,17 +982,15 @@ window.testArcGISService = async function() {
             };
         }
         
-        displayOutput('viewportOutput', {
-            title: 'ArcGIS Service Test',
+        const result = {
             serviceUrl: serviceUrl,
             results: testResults
-        });
+        };
+        
+        displayOutput('viewportOutput', result);
         
     } catch (error) {
-        displayOutput('viewportOutput', { 
-            title: 'ArcGIS Service Test Error',
-            error: error.message 
-        });
+        displayOutput('viewportOutput', { error: error.message });
     }
 };
 

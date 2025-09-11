@@ -4,48 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Giraffe SDK Test</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-            background: #f5f5f5;
-        }
-        .container {
-            max-width: 800px;
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        button {
-            background: #007cba;
-            color: white;
-            border: none;
-            padding: 10px 15px;
-            margin: 5px;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        button:hover {
-            background: #005a87;
-        }
-        .output {
-            background: #f8f9fa;
-            border: 1px solid #dee2e6;
-            padding: 15px;
-            margin: 10px 0;
-            border-radius: 4px;
-            white-space: pre-wrap;
-            font-family: monospace;
-            max-height: 400px;
-            overflow-y: auto;
-        }
-        .section {
-            margin: 20px 0;
-            padding: 15px;
-            border-left: 4px solid #007cba;
-        }
-    </style>
+    <link rel="stylesheet" href="styles/main.css">
 </head>
 <body>
     <div class="container">
@@ -53,39 +12,39 @@
         
         <div class="section">
             <h2>Project Information</h2>
-            <button onclick="getCurrentProject()">Get Current Project</button>
-            <button onclick="getAllProjects()">Get All Projects</button>
-            <button onclick="getCurrentProjectBoundary()">Get Current Project Boundary</button>
+            <button id="getCurrentProject">Get Current Project</button>
+            <button id="getAllProjects">Get All Projects</button>
+            <button id="getCurrentProjectBoundary">Get Current Project Boundary</button>
             <div id="projectOutput" class="output"></div>
         </div>
 
         <div class="section">
             <h2>Map State</h2>
-            <button onclick="getMapView()">Get Map View</button>
-            <button onclick="getSelectedFeatures()">Get Selected Features</button>
+            <button id="getMapView">Get Map View</button>
+            <button id="getSelectedFeatures">Get Selected Features</button>
             <div id="mapOutput" class="output"></div>
         </div>
 
         <div class="section">
             <h2>Layers</h2>
-            <button onclick="getProjectLayers()">Get Project Layers</button>
-            <button onclick="getRawSections()">Get Raw Sections</button>
-            <button onclick="getBakedSections()">Get Baked Sections</button>
-            <button onclick="getLayerTree()">Get Layer Tree</button>
+            <button id="getProjectLayers">Get Project Layers</button>
+            <button id="getRawSections">Get Raw Sections</button>
+            <button id="getBakedSections">Get Baked Sections</button>
+            <button id="getLayerTree">Get Layer Tree</button>
             <br><br>
             <h3>Layer Type Exploration</h3>
-            <button onclick="exploreLayerTypes()">🔍 Explore Layer Types</button>
-            <button onclick="analyzeDataLayers()">📊 Deep Data Layer Analysis</button>
-            <button onclick="testDrawingLayerActivation()">🎨 Test Drawing Layer Activation</button>
-            <button onclick="testLayerContents()">📄 Test Layer Contents</button>
+            <button id="exploreLayerTypes">🔍 Explore Layer Types</button>
+            <button id="analyzeDataLayers">📊 Deep Data Layer Analysis</button>
+            <button id="testDrawingLayerActivation">🎨 Test Drawing Layer Activation</button>
+            <button id="testLayerContents">📄 Test Layer Contents</button>
             <div id="layersOutput" class="output"></div>
         </div>
 
         <div class="section">
             <h2>Boundary Investigation</h2>
-            <button onclick="checkSelectedForBoundary()">Check If Selected = Boundary</button>
-            <button onclick="exploreAllStates()">Explore All State Keys</button>
-            <button onclick="getMapContent()">Get Map Content</button>
+            <button id="checkSelectedForBoundary">Check If Selected = Boundary</button>
+            <button id="exploreAllStates">Explore All State Keys</button>
+            <button id="getMapContent">Get Map Content</button>
             <div id="boundaryOutput" class="output"></div>
         </div>
 
@@ -95,15 +54,15 @@
                 Load Charlotte zoning districts with <strong>smooth, seamless updates</strong> based on current map viewport. 
                 Features automatically refresh when you pan/zoom with intelligent caching for better performance.
             </p>
-            <button onclick="testArcGISService()">🔧 Test ArcGIS Service</button>
-            <button onclick="activateViewportLayer()">▶️ Activate Layer</button>
-            <button onclick="refreshViewportLayer()">🔄 Refresh Layer</button>
-            <button onclick="getViewportLayerStatus()">📊 Layer Status</button>
-            <button onclick="deactivateViewportLayer()">⏹️ Deactivate Layer</button>
+            <button id="testArcGISService">🔧 Test ArcGIS Service</button>
+            <button id="activateViewportLayer">▶️ Activate Layer</button>
+            <button id="refreshViewportLayer">🔄 Refresh Layer</button>
+            <button id="getViewportLayerStatus">📊 Layer Status</button>
+            <button id="deactivateViewportLayer">⏹️ Deactivate Layer</button>
             <div id="viewportOutput" class="output"></div>
         </div>
     </div>
 
-    <script src="app.js"></script>
+    <script src="src/app.js" type="module"></script>
 </body>
 </html>
