@@ -10,6 +10,35 @@ body {
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
+/* Tabs */
+.tabs {
+    display: flex;
+    gap: 8px;
+    border-bottom: 1px solid #e5e7eb;
+    padding-bottom: 8px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+}
+.tab {
+    background: #e9eef3;
+    color: #1f2a37;
+    border: none;
+    padding: 8px 12px;
+    margin: 0;
+    border-radius: 6px 6px 0 0;
+    cursor: pointer;
+    font-weight: 600;
+}
+.tab:hover {
+    background: #d8e3ec;
+}
+.tab.active {
+    background: #007cba;
+    color: #fff;
+}
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
 button {
     background: #007cba;
     color: white;
@@ -33,16 +62,20 @@ button:hover {
     max-height: 400px;
     overflow-y: auto;
     position: relative;
+    cursor: copy;
 }
 .copy-btn {
     position: absolute;
-    top: 10px;
-    right: 10px;
+    top: 8px;
+    right: 8px;
     z-index: 10;
     width: 32px;
     height: 32px;
-    transition: background-color 0.2s ease;
+    transition: opacity 0.2s ease, background-color 0.2s ease;
+    opacity: 0;
+    pointer-events: none;
 }
+.output:hover .copy-btn, .output:focus-within .copy-btn { opacity: 1; pointer-events: auto; }
 .copy-btn:hover {
     background-color: #218838 !important;
 }

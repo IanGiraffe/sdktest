@@ -9,8 +9,17 @@
 <body>
     <div class="container">
         <h1>Giraffe SDK Test App</h1>
-        
-        <div class="section">
+
+        <div class="tabs" role="tablist">
+            <button class="tab active" data-target="#tab-project" role="tab" aria-selected="true">Project</button>
+            <button class="tab" data-target="#tab-map" role="tab" aria-selected="false">Map</button>
+            <button class="tab" data-target="#tab-layers" role="tab" aria-selected="false">Layers</button>
+            <button class="tab" data-target="#tab-boundary" role="tab" aria-selected="false">Boundary</button>
+            <button class="tab" data-target="#tab-viewport" role="tab" aria-selected="false">Viewport</button>
+            <button class="tab" data-target="#tab-analytics" role="tab" aria-selected="false">Analytics</button>
+        </div>
+
+        <div id="tab-project" class="tab-content section active" role="tabpanel">
             <h2>Project Information</h2>
             <button id="getCurrentProject">Get Current Project</button>
             <button id="getAllProjects">Get All Projects</button>
@@ -18,14 +27,14 @@
             <div id="projectOutput" class="output"></div>
         </div>
 
-        <div class="section">
+        <div id="tab-map" class="tab-content section" role="tabpanel" hidden>
             <h2>Map State</h2>
             <button id="getMapView">Get Map View</button>
             <button id="getSelectedFeatures">Get Selected Features</button>
             <div id="mapOutput" class="output"></div>
         </div>
 
-        <div class="section">
+        <div id="tab-layers" class="tab-content section" role="tabpanel" hidden>
             <h2>Layers</h2>
             <button id="getProjectLayers">Get Project Layers</button>
             <button id="getRawSections">Get Raw Sections</button>
@@ -40,7 +49,7 @@
             <div id="layersOutput" class="output"></div>
         </div>
 
-        <div class="section">
+        <div id="tab-boundary" class="tab-content section" role="tabpanel" hidden>
             <h2>Boundary Investigation</h2>
             <button id="checkSelectedForBoundary">Check If Selected = Boundary</button>
             <button id="exploreAllStates">Explore All State Keys</button>
@@ -48,7 +57,7 @@
             <div id="boundaryOutput" class="output"></div>
         </div>
 
-        <div class="section">
+        <div id="tab-viewport" class="tab-content section" role="tabpanel" hidden>
             <h2>🗺️ Viewport-Based Vector Layer</h2>
             <p style="font-size: 14px; color: #666; margin-bottom: 15px;">
                 Load Charlotte zoning districts with <strong>smooth, seamless updates</strong> based on current map viewport. 
@@ -60,6 +69,12 @@
             <button id="getViewportLayerStatus">📊 Layer Status</button>
             <button id="deactivateViewportLayer">⏹️ Deactivate Layer</button>
             <div id="viewportOutput" class="output"></div>
+        </div>
+
+        <div id="tab-analytics" class="tab-content section" role="tabpanel" hidden>
+            <h2>Analytics</h2>
+            <button id="getAnalyticsResult">Get Analytics Result</button>
+            <div id="analyticsOutput" class="output"></div>
         </div>
     </div>
 

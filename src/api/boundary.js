@@ -48,3 +48,5 @@ export function exploreAllStates(giraffeState) {
         displayOutput('boundaryOutput', { error: error.message });
     }
 }
+
+

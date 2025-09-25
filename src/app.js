@@ -3,6 +3,8 @@ import { getMapView, getSelectedFeatures, getMapContent } from './api/map.js';
 import { getProjectLayers, getRawSections, getBakedSections, getLayerTree, exploreLayerTypes, analyzeDataLayers, testDrawingLayerActivation, testLayerContents } from './api/layers.js';
 import { checkSelectedForBoundary, exploreAllStates } from './api/boundary.js';
 import { activateViewportLayer, deactivateViewportLayer, refreshViewportLayer, getViewportLayerStatus, testArcGISService } from './api/viewport.js';
+import { setupAnalytics } from './ui/analytics.js';
+import { setupTabs } from './ui/tabs.js';
 
 // Giraffe SDK - only works within Giraffe iframe
 let giraffeState, rpc;
@@ -54,6 +56,9 @@ function initializeApp() {
     document.getElementById('getViewportLayerStatus').addEventListener('click', () => getViewportLayerStatus());
     document.getElementById('deactivateViewportLayer').addEventListener('click', () => deactivateViewportLayer());
 
+    // Analytics
+    setupAnalytics(rpc);
+
     // Initialize and listen for state changes
     console.log('Giraffe SDK Test App initialized');
 
@@ -72,6 +77,9 @@ function initializeApp() {
 
 // Initialize SDK when page loads
 document.addEventListener('DOMContentLoaded', async function() {
+    // Set up UI tabs immediately
+    setupTabs();
+
     const { success } = await loadGiraffeSDK();
     if (!success) {
         console.log('SDK not loaded - make sure this app is running within Giraffe iframe');

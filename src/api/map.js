@@ -26,3 +26,5 @@ export function getMapContent(giraffeState) {
         displayOutput('boundaryOutput', { error: error.message });
     }
 }
+
+

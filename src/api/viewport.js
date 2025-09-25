@@ -160,3 +160,5 @@ export async function testArcGISService(giraffeState) {
         displayOutput('viewportOutput', { error: error.message });
     }
 }
+
+

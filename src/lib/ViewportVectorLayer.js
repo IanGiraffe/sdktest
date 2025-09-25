@@ -328,3 +328,5 @@ export class ViewportVectorLayer {
                Math.abs(b1.west - b2.west) < tolerance;
     }
 }
+
+
