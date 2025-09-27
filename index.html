@@ -15,6 +15,7 @@
             <button class="tab" data-target="#tab-map" role="tab" aria-selected="false">Map</button>
             <button class="tab" data-target="#tab-layers" role="tab" aria-selected="false">Layers</button>
             <button class="tab" data-target="#tab-boundary" role="tab" aria-selected="false">Boundary</button>
+            <button class="tab" data-target="#tab-views" role="tab" aria-selected="false">Views</button>
             <button class="tab" data-target="#tab-viewport" role="tab" aria-selected="false">Viewport</button>
             <button class="tab" data-target="#tab-analytics" role="tab" aria-selected="false">Analytics</button>
         </div>
@@ -55,6 +56,17 @@
             <button id="exploreAllStates">Explore All State Keys</button>
             <button id="getMapContent">Get Map Content</button>
             <div id="boundaryOutput" class="output"></div>
+        </div>
+
+        <div id="tab-views" class="tab-content section" role="tabpanel" hidden>
+            <h2>Views Exploration</h2>
+            <p style="font-size: 14px; color: #666; margin-bottom: 15px;">
+                Explore the available views in the project. Views contain saved map states, filters, and configurations.
+            </p>
+            <button id="getAllViews">Get All Views</button>
+            <button id="analyzeViewStructure">Analyze View Structure</button>
+            <button id="getViewDetails">Get View Details</button>
+            <div id="viewsOutput" class="output"></div>
         </div>
 
         <div id="tab-viewport" class="tab-content section" role="tabpanel" hidden>

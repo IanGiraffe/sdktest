@@ -2,6 +2,7 @@ import { getCurrentProject, getAllProjects, getCurrentProjectBoundary } from './
 import { getMapView, getSelectedFeatures, getMapContent } from './api/map.js';
 import { getProjectLayers, getRawSections, getBakedSections, getLayerTree, exploreLayerTypes, analyzeDataLayers, testDrawingLayerActivation, testLayerContents } from './api/layers.js';
 import { checkSelectedForBoundary, exploreAllStates } from './api/boundary.js';
+import { getAllViews, analyzeViewStructure, getViewDetails } from './api/views.js';
 import { activateViewportLayer, deactivateViewportLayer, refreshViewportLayer, getViewportLayerStatus, testArcGISService } from './api/viewport.js';
 import { setupAnalytics } from './ui/analytics.js';
 import { setupTabs } from './ui/tabs.js';
@@ -48,6 +49,11 @@ function initializeApp() {
     document.getElementById('checkSelectedForBoundary').addEventListener('click', () => checkSelectedForBoundary(rpc));
     document.getElementById('exploreAllStates').addEventListener('click', () => exploreAllStates(giraffeState));
     document.getElementById('getMapContent').addEventListener('click', () => getMapContent(giraffeState));
+
+    // Views Exploration
+    document.getElementById('getAllViews').addEventListener('click', () => getAllViews(giraffeState));
+    document.getElementById('analyzeViewStructure').addEventListener('click', () => analyzeViewStructure(giraffeState));
+    document.getElementById('getViewDetails').addEventListener('click', () => getViewDetails(giraffeState));
 
     // Viewport-Based Vector Layer
     document.getElementById('testArcGISService').addEventListener('click', () => testArcGISService(giraffeState));
