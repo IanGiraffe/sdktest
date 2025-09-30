@@ -1,19 +1,15 @@
-import { getCurrentProject, getAllProjects, getCurrentProjectBoundary } from './api/project.js';
-import { getMapView, getSelectedFeatures, getMapContent } from './api/map.js';
-import { getProjectLayers, getRawSections, getBakedSections, getLayerTree, exploreLayerTypes, analyzeDataLayers, testDrawingLayerActivation, testLayerContents } from './api/layers.js';
-import { checkSelectedForBoundary, exploreAllStates } from './api/boundary.js';
-import { getAllViews, analyzeViewStructure, getViewDetails } from './api/views.js';
-import { activateViewportLayer, deactivateViewportLayer, refreshViewportLayer, getViewportLayerStatus, testArcGISService } from './api/viewport.js';
 import { setupAnalytics } from './ui/analytics.js';
 import { setupTabs } from './ui/tabs.js';
+import { functionCatalog } from './automation/functionCatalog.js';
+import { setupAutomationPanel } from './automation/setupAutomation.js';
+import { displayOutput } from './ui/ui.js';
 
-// Giraffe SDK - only works within Giraffe iframe
-let giraffeState, rpc;
+let giraffeState;
+let rpc;
+let automationController = null;
 
-// Load the SDK dynamically when running in Giraffe
 async function loadGiraffeSDK() {
     try {
-        // Import SDK modules
         const sdk = await import('https://esm.run/@gi-nx/iframe-sdk');
         giraffeState = sdk.giraffeState;
         rpc = sdk.rpc;
@@ -25,68 +21,61 @@ async function loadGiraffeSDK() {
     }
 }
 
-function initializeApp() {
-    // Project Information
-    document.getElementById('getCurrentProject').addEventListener('click', () => getCurrentProject(giraffeState));
-    document.getElementById('getAllProjects').addEventListener('click', () => getAllProjects(giraffeState));
-    document.getElementById('getCurrentProjectBoundary').addEventListener('click', () => getCurrentProjectBoundary(giraffeState));
+function bindManualButtons(context) {
+    functionCatalog.forEach(fn => {
+        if (!fn.buttonId || typeof fn.invoke !== 'function') {
+            return;
+        }
+        const button = document.getElementById(fn.buttonId);
+        if (!button || button.dataset.automationBound === '1') {
+            return;
+        }
 
-    // Map State
-    document.getElementById('getMapView').addEventListener('click', () => getMapView(giraffeState));
-    document.getElementById('getSelectedFeatures').addEventListener('click', () => getSelectedFeatures(rpc));
-
-    // Layers
-    document.getElementById('getProjectLayers').addEventListener('click', () => getProjectLayers(giraffeState));
-    document.getElementById('getRawSections').addEventListener('click', () => getRawSections(giraffeState));
-    document.getElementById('getBakedSections').addEventListener('click', () => getBakedSections(giraffeState));
-    document.getElementById('getLayerTree').addEventListener('click', () => getLayerTree(giraffeState));
-    document.getElementById('exploreLayerTypes').addEventListener('click', () => exploreLayerTypes(giraffeState));
-    document.getElementById('analyzeDataLayers').addEventListener('click', () => analyzeDataLayers(giraffeState));
-    document.getElementById('testDrawingLayerActivation').addEventListener('click', () => testDrawingLayerActivation(rpc));
-    document.getElementById('testLayerContents').addEventListener('click', () => testLayerContents(rpc, giraffeState));
-
-    // Boundary Investigation
-    document.getElementById('checkSelectedForBoundary').addEventListener('click', () => checkSelectedForBoundary(rpc));
-    document.getElementById('exploreAllStates').addEventListener('click', () => exploreAllStates(giraffeState));
-    document.getElementById('getMapContent').addEventListener('click', () => getMapContent(giraffeState));
-
-    // Views Exploration
-    document.getElementById('getAllViews').addEventListener('click', () => getAllViews(giraffeState));
-    document.getElementById('analyzeViewStructure').addEventListener('click', () => analyzeViewStructure(giraffeState));
-    document.getElementById('getViewDetails').addEventListener('click', () => getViewDetails(giraffeState));
-
-    // Viewport-Based Vector Layer
-    document.getElementById('testArcGISService').addEventListener('click', () => testArcGISService(giraffeState));
-    document.getElementById('activateViewportLayer').addEventListener('click', () => activateViewportLayer(rpc, giraffeState));
-    document.getElementById('refreshViewportLayer').addEventListener('click', () => refreshViewportLayer());
-    document.getElementById('getViewportLayerStatus').addEventListener('click', () => getViewportLayerStatus());
-    document.getElementById('deactivateViewportLayer').addEventListener('click', () => deactivateViewportLayer());
-
-    // Analytics
-    setupAnalytics(rpc);
-
-    // Initialize and listen for state changes
-    console.log('Giraffe SDK Test App initialized');
-
-    // Listen for project changes
-    if (giraffeState && typeof giraffeState.addListener === 'function') {
-        giraffeState.addListener(['project', 'projects'], () => {
-            console.log('Project data changed');
+        button.addEventListener('click', async () => {
+            try {
+                const data = await fn.invoke(context);
+                if (fn.outputId) {
+                    displayOutput(fn.outputId, data);
+                }
+            } catch (error) {
+                const formattedError = error instanceof Error ? error.message : String(error);
+                if (fn.outputId) {
+                    displayOutput(fn.outputId, { error: formattedError });
+                }
+                console.error(`Manual invocation failed for ${fn.id}:`, error);
+            }
         });
 
-        // Listen for map changes
-        giraffeState.addListener(['mapView', 'selected'], () => {
-            console.log('Map state changed');
-        });
-    }
+        button.dataset.automationBound = '1';
+    });
 }
 
-// Initialize SDK when page loads
-document.addEventListener('DOMContentLoaded', async function() {
-    // Set up UI tabs immediately
+function initializeListeners(state) {
+    if (!state || typeof state.addListener !== 'function') {
+        return;
+    }
+
+    state.addListener(['project', 'projects'], () => {
+        console.log('Project data changed');
+    });
+
+    state.addListener(['mapView', 'selected'], () => {
+        console.log('Map state changed');
+    });
+}
+
+async function initializeApp(context) {
+    bindManualButtons(context);
+    setupAnalytics(context.rpc);
+    automationController = setupAutomationPanel(context);
+    initializeListeners(context.giraffeState);
+    console.log('Giraffe SDK Test App initialized');
+}
+
+document.addEventListener('DOMContentLoaded', async () => {
     setupTabs();
 
-    const { success } = await loadGiraffeSDK();
+    const { success, error } = await loadGiraffeSDK();
     if (!success) {
         console.log('SDK not loaded - make sure this app is running within Giraffe iframe');
         document.body.innerHTML = `
@@ -99,9 +88,11 @@ document.addEventListener('DOMContentLoaded', async function() {
                     <li>Add the iframe app</li>
                     <li>Set the URL to: <code>http://localhost:3001</code></li>
                 </ol>
+                <p style="margin-top:16px; color:#b91c1c;">${error ? `Error: ${error.message || error}` : ''}</p>
             </div>
         `;
-    } else {
-        initializeApp();
+        return;
     }
+
+    await initializeApp({ giraffeState, rpc });
 });

@@ -18,6 +18,7 @@
             <button class="tab" data-target="#tab-views" role="tab" aria-selected="false">Views</button>
             <button class="tab" data-target="#tab-viewport" role="tab" aria-selected="false">Viewport</button>
             <button class="tab" data-target="#tab-analytics" role="tab" aria-selected="false">Analytics</button>
+            <button class="tab" data-target="#tab-automation" role="tab" aria-selected="false">Automation</button>
         </div>
 
         <div id="tab-project" class="tab-content section active" role="tabpanel">
@@ -25,14 +26,14 @@
             <button id="getCurrentProject">Get Current Project</button>
             <button id="getAllProjects">Get All Projects</button>
             <button id="getCurrentProjectBoundary">Get Current Project Boundary</button>
-            <div id="projectOutput" class="output"></div>
+            <div id="projectOutput" class="output" aria-live="polite"></div>
         </div>
 
         <div id="tab-map" class="tab-content section" role="tabpanel" hidden>
             <h2>Map State</h2>
             <button id="getMapView">Get Map View</button>
             <button id="getSelectedFeatures">Get Selected Features</button>
-            <div id="mapOutput" class="output"></div>
+            <div id="mapOutput" class="output" aria-live="polite"></div>
         </div>
 
         <div id="tab-layers" class="tab-content section" role="tabpanel" hidden>
@@ -41,13 +42,13 @@
             <button id="getRawSections">Get Raw Sections</button>
             <button id="getBakedSections">Get Baked Sections</button>
             <button id="getLayerTree">Get Layer Tree</button>
-            <br><br>
+            <div class="stack-gap"></div>
             <h3>Layer Type Exploration</h3>
-            <button id="exploreLayerTypes">🔍 Explore Layer Types</button>
-            <button id="analyzeDataLayers">📊 Deep Data Layer Analysis</button>
-            <button id="testDrawingLayerActivation">🎨 Test Drawing Layer Activation</button>
-            <button id="testLayerContents">📄 Test Layer Contents</button>
-            <div id="layersOutput" class="output"></div>
+            <button id="exploreLayerTypes">Explore Layer Types</button>
+            <button id="analyzeDataLayers">Deep Data Layer Analysis</button>
+            <button id="testDrawingLayerActivation">Test Drawing Layer Activation</button>
+            <button id="testLayerContents">Test Layer Contents</button>
+            <div id="layersOutput" class="output" aria-live="polite"></div>
         </div>
 
         <div id="tab-boundary" class="tab-content section" role="tabpanel" hidden>
@@ -55,38 +56,72 @@
             <button id="checkSelectedForBoundary">Check If Selected = Boundary</button>
             <button id="exploreAllStates">Explore All State Keys</button>
             <button id="getMapContent">Get Map Content</button>
-            <div id="boundaryOutput" class="output"></div>
+            <div id="boundaryOutput" class="output" aria-live="polite"></div>
         </div>
 
         <div id="tab-views" class="tab-content section" role="tabpanel" hidden>
             <h2>Views Exploration</h2>
-            <p style="font-size: 14px; color: #666; margin-bottom: 15px;">
+            <p class="tab-description">
                 Explore the available views in the project. Views contain saved map states, filters, and configurations.
             </p>
             <button id="getAllViews">Get All Views</button>
             <button id="analyzeViewStructure">Analyze View Structure</button>
             <button id="getViewDetails">Get View Details</button>
-            <div id="viewsOutput" class="output"></div>
+            <div id="viewsOutput" class="output" aria-live="polite"></div>
         </div>
 
         <div id="tab-viewport" class="tab-content section" role="tabpanel" hidden>
-            <h2>🗺️ Viewport-Based Vector Layer</h2>
-            <p style="font-size: 14px; color: #666; margin-bottom: 15px;">
-                Load Charlotte zoning districts with <strong>smooth, seamless updates</strong> based on current map viewport. 
-                Features automatically refresh when you pan/zoom with intelligent caching for better performance.
+            <h2>Viewport-Based Vector Layer</h2>
+            <p class="tab-description">
+                Load Charlotte zoning districts with <strong>smooth, seamless updates</strong> based on the current map viewport.
+                Features automatically refresh when you pan or zoom, with intelligent caching for better performance.
             </p>
-            <button id="testArcGISService">🔧 Test ArcGIS Service</button>
-            <button id="activateViewportLayer">▶️ Activate Layer</button>
-            <button id="refreshViewportLayer">🔄 Refresh Layer</button>
-            <button id="getViewportLayerStatus">📊 Layer Status</button>
-            <button id="deactivateViewportLayer">⏹️ Deactivate Layer</button>
-            <div id="viewportOutput" class="output"></div>
+            <button id="testArcGISService">Test ArcGIS Service</button>
+            <button id="activateViewportLayer">Activate Layer</button>
+            <button id="refreshViewportLayer">Refresh Layer</button>
+            <button id="getViewportLayerStatus">Layer Status</button>
+            <button id="deactivateViewportLayer">Deactivate Layer</button>
+            <div id="viewportOutput" class="output" aria-live="polite"></div>
         </div>
 
         <div id="tab-analytics" class="tab-content section" role="tabpanel" hidden>
             <h2>Analytics</h2>
             <button id="getAnalyticsResult">Get Analytics Result</button>
-            <div id="analyticsOutput" class="output"></div>
+            <div id="analyticsOutput" class="output" aria-live="polite"></div>
+        </div>
+
+        <div id="tab-automation" class="tab-content section" role="tabpanel" hidden>
+            <h2>Automation</h2>
+            <p class="tab-description">
+                Generate consistent documentation snapshots by running read-only SDK functions in sequence.
+                Mutating calls are cataloged separately for human review so nothing destructive is automated by accident.
+            </p>
+
+            <section class="automation-section">
+                <h3>Catalog Overview</h3>
+                <div id="automationSummary" class="automation-summary"></div>
+                <div id="humanReviewList" class="automation-review"></div>
+            </section>
+
+            <section class="automation-section">
+                <h3>Automation Controls</h3>
+                <div class="automation-controls">
+                    <button id="runSafeFunctions">Run Safe (Read/Network) Functions</button>
+                    <button id="clearAutomationLog" class="secondary">Clear Log</button>
+                </div>
+                <div id="automationStatus" class="automation-status" aria-live="polite"></div>
+                <div id="automationLog" class="automation-log output" aria-live="assertive"></div>
+            </section>
+
+            <section class="automation-section">
+                <h3>Documentation Preview</h3>
+                <textarea id="automationDocPreview" class="automation-doc-preview" rows="12" spellcheck="false"></textarea>
+            </section>
+
+            <section class="automation-section">
+                <h3>Function Catalog</h3>
+                <div id="automationCatalog"></div>
+            </section>
         </div>
     </div>
 

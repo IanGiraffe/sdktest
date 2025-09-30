@@ -4,13 +4,12 @@ body {
     background: #f5f5f5;
 }
 .container {
-    max-width: 800px;
+    max-width: 1040px;
     background: white;
-    padding: 20px;
+    padding: 24px;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
-/* Tabs */
 .tabs {
     display: flex;
     gap: 8px;
@@ -47,9 +46,16 @@ button {
     margin: 5px;
     border-radius: 4px;
     cursor: pointer;
+    transition: background 0.2s ease;
 }
 button:hover {
     background: #005a87;
+}
+button.secondary {
+    background: #6b7280;
+}
+button.secondary:hover {
+    background: #4b5563;
 }
 .output {
     background: #f8f9fa;
@@ -83,4 +89,155 @@ button:hover {
     margin: 20px 0;
     padding: 15px;
     border-left: 4px solid #007cba;
+}
+.tab-description {
+    font-size: 14px;
+    color: #555;
+    margin: 10px 0 20px;
+}
+.stack-gap {
+    height: 16px;
+}
+
+/* Automation layout */
+.automation-section {
+    margin-top: 24px;
+}
+.automation-summary {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+.automation-stat {
+    background: #f1f5f9;
+    border-radius: 6px;
+    padding: 12px 16px;
+    font-weight: 600;
+}
+.automation-categories {
+    margin-top: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    font-size: 13px;
+    color: #374151;
+}
+.category-chip {
+    background: #dbeafe;
+    border-radius: 999px;
+    padding: 4px 10px;
+}
+.automation-controls {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+.automation-status {
+    margin-top: 12px;
+    font-size: 14px;
+    color: #1f2937;
+}
+.automation-log {
+    margin-top: 16px;
+    max-height: 360px;
+    overflow-y: auto;
+}
+.automation-log-entry {
+    border: 1px solid #e5e7eb;
+    border-left-width: 4px;
+    border-radius: 6px;
+    padding: 12px;
+    margin-bottom: 12px;
+    background: #fff;
+}
+.automation-log-entry.success {
+    border-left-color: #16a34a;
+}
+.automation-log-entry.error {
+    border-left-color: #dc2626;
+}
+.automation-log-header {
+    display: flex;
+    justify-content: space-between;
+    font-weight: 600;
+    margin-bottom: 6px;
+    color: #111827;
+}
+.automation-log-meta {
+    font-size: 12px;
+    color: #6b7280;
+}
+.automation-log-summary {
+    font-size: 13px;
+    color: #374151;
+    margin-bottom: 8px;
+}
+.automation-log-json {
+    background: #0f172a;
+    color: #e2e8f0;
+    padding: 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    overflow-x: auto;
+}
+.automation-doc-preview {
+    width: 100%;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-family: monospace;
+    padding: 12px;
+    resize: vertical;
+    background: #f9fafb;
+}
+.automation-review-list {
+    list-style: disc;
+    padding-left: 20px;
+    margin-top: 8px;
+}
+.automation-review-list .badge {
+    display: inline-block;
+    background: #f97316;
+    color: white;
+    border-radius: 4px;
+    padding: 2px 6px;
+    font-size: 11px;
+    margin-left: 6px;
+}
+.automation-review-list .note {
+    font-size: 13px;
+    color: #4b5563;
+    margin-top: 4px;
+}
+.automation-catalog-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 12px;
+    font-size: 13px;
+}
+.automation-catalog-table th,
+.automation-catalog-table td {
+    border: 1px solid #e5e7eb;
+    padding: 8px;
+    text-align: left;
+    vertical-align: top;
+}
+.automation-catalog-table th {
+    background: #f1f5f9;
+}
+
+@media (max-width: 720px) {
+    .container {
+        padding: 16px;
+    }
+    .tabs {
+        gap: 4px;
+    }
+    button {
+        width: 100%;
+    }
+    .automation-controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
 }
