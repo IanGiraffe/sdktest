@@ -1,0 +1,4 @@
+﻿const fs = require('fs');
+const text = fs.readFileSync('src/automation/setupAutomation.js', 'utf8');
+const pattern = "  async function runSafeFunctions() {\r\n    if (state.isRunning) return;\r\n    state.isRunning = true;\r\n\r\n    if (statusEl) {\r\n      statusEl.textContent = `Running ${safeFunctions.length} direct read/network SDK calls.`;\r\n    }\r\n\r\n    for (const fn of safeFunctions) {\r\n      if (statusEl) {\r\n        statusEl.textContent = `Running ${fn.label}.`;\r\n      }\r\n      try {\r\n        const data = await fn.invoke(context);\r\n        recordResult(fn, { success: true, data });\r\n      } catch (error) {\r\n        recordResult(fn, { success: false, error: formatError(error) });\r\n      }\r\n    }\r\n\r\n    if (statusEl) {\r\n      statusEl.textContent = 'Safe run complete.';\r\n    }\r\n    state.isRunning = false;\r\n  }";
+console.log(text.includes(pattern));

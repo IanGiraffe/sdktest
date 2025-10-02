@@ -950,8 +950,1198 @@ if (result?.status?.state === 'succeeded') {
 - The schema is organization/app specific. Introspect keys to adapt UI robustly. Avoid hard-coding to a single expected shape unless your app controls the analytics pipeline.
 
 
+## Additional giraffeState Keys
+
+### **`get('selected')`**
+
+Returns a GeoJSON FeatureCollection of currently selected features on the map.
+
+#### Response Structure:
+- `type`: "FeatureCollection"
+- `features`: array of selected Feature objects
+  - Each feature includes `geometry`, `properties`, and feature metadata
+  - Selection may include features from multiple layers
+  - Empty array if nothing is selected
+
+#### Usage Patterns:
+```js
+const selectedFeatures = giraffeState.get('selected');
+console.log(`${selectedFeatures.features.length} features selected`);
+
+selectedFeatures.features.forEach(feature => {
+  console.log(`Selected: ${feature.properties.id}`);
+});
+```
+
+#### Notes:
+- Updates when user selection changes on the map
+- Prefer `rpc.invoke('getSelectedFeatures')` for one-time reads
+- Use `giraffeState.addListener(['selected'], callback)` to react to selection changes
+
+### **`get('projectOrigin')`**
+
+Returns the project's origin coordinates used for local coordinate system calculations.
+
+#### Response Structure:
+- Array format: `[longitude, latitude]` in WGS84 decimal degrees
+- Used as reference point for projected coordinate conversions
+
+#### Usage Patterns:
+```js
+const projectOrigin = giraffeState.get('projectOrigin');
+const [lng, lat] = projectOrigin;
+
+// Use with coordinate conversion functions
+const projected = await rpc.invoke('toProjected', [geoJSON, projectOrigin]);
+const geographic = await rpc.invoke('fromProjected', [projected, projectOrigin]);
+```
+
+#### Notes:
+- Essential for working with local coordinate systems (meters-based)
+- Typically matches the project's grid origin from `giraffeState.get('project').properties.grid.origin`
+- Required for external geometry processing workflows
+
+### **`get('projectAppsByAppID')`**
+
+Returns an object mapping app IDs to their project-specific data stores.
+
+#### Response Structure:
+```js
+{
+  "1": {  // App ID 1 is the built-in Giraffe app
+    "app": 1,
+    "project": "project-id",
+    "public": { /* app-specific public data */ },
+    "private": { /* app-specific private data */ },
+    "featureCategories": { /* layer organization */ }
+  },
+  "customAppId": {
+    "app": "customAppId",
+    "project": "project-id",
+    "public": { /* custom app public data */ },
+    "private": { /* custom app private data */ }
+  }
+}
+```
+
+#### Usage Patterns:
+```js
+const appData = giraffeState.get('projectAppsByAppID');
+const giraffeAppData = appData['1'];
+const myAppData = appData['myCustomAppId'];
+
+// Access app-specific configuration
+console.log('Feature categories:', giraffeAppData.featureCategories);
+```
+
+#### Notes:
+- Each app maintains its own data store per project
+- `public` data is shareable across apps; `private` is app-specific
+- Use `rpc.invoke('updateProjectApp', [appId, data])` to modify
+
+### **`get('flows')`**
+
+Returns flow data for the current project.
+
+#### Response Structure:
+```js
+{
+  "flowId": {
+    /* GiraffeNodeGraph structure */
+    // Workflow definition and state
+  }
+}
+```
+
+#### Usage Patterns:
+```js
+const flows = giraffeState.get('flows');
+const flowIds = Object.keys(flows);
+
+flowIds.forEach(id => {
+  console.log(`Flow ${id}:`, flows[id]);
+});
+```
+
+#### Notes:
+- Represents saved flows and automation pipelines
+- Structure depends on Giraffe's workflow system configuration
+- May be empty if no flows are configured for the project
+
+### **`get('selectedProjectApp')`**
+
+Returns the currently active/selected project app.
+
+#### Response Structure:
+```js
+{
+  "app": 1,  // or custom app ID
+  "appName": "Giraffe",
+  "project": "project-id",
+  "public": {
+    /* app-specific public data accessible to all apps */
+  },
+  "private": {
+    /* app-specific private data */
+  },
+  "featureCategories": {
+    /* layer organization and categorization */
+  },
+  "mapStyle": {
+    /* Mapbox GL style configuration */
+  },
+  "opacity": 1,
+  "readMe": "App description or help text"
+}
+```
+
+#### Usage Patterns:
+```js
+const activeApp = giraffeState.get('selectedProjectApp');
+console.log(`Active app: ${activeApp.appName}`);
+
+// Access app's public data store
+const appPublicData = activeApp.public;
+
+// Update app data
+rpc.invoke('updateProjectApp', [activeApp.app, {
+  ...activeApp,
+  public: {
+    ...activeApp.public,
+    newField: 'newValue'
+  }
+}]);
+```
+
+#### Notes:
+- Changes when user switches between apps in the UI
+- Most common use case: reading/writing to the app's data store
+- Use `giraffeState.addListener(['selectedProjectApp'], callback)` to detect app changes
+
+## Commands Module Functions
+
+### **`getLassoShape()`**
+
+Gets the polygon shape drawn by the user using the lasso tool.
+
+#### Signature:
+```js
+await rpc.invoke('getLassoShape', [])
+```
+
+#### Returns:
+- GeoJSON Feature with Polygon geometry representing the lasso selection area
+- Properties include metadata about the drawn shape
+
+#### Usage Patterns:
+```js
+const lassoShape = await rpc.invoke('getLassoShape', []);
+console.log('Lasso area:', lassoShape.geometry);
+
+// Use the shape as a search boundary
+const featuresInLasso = await queryFeaturesInPolygon(lassoShape);
+```
+
+#### Notes:
+- Requires user to have drawn a lasso selection first
+- Returns the most recent lasso shape
+- Useful for custom spatial queries and filtering
+
+### **`getUserDrawnPolygon()`**
+
+Prompts the user to draw a polygon and returns the result.
+
+#### Signature:
+```js
+await rpc.invoke('getUserDrawnPolygon', [])
+```
+
+#### Returns:
+- Promise that resolves to a GeoJSON Feature with Polygon geometry
+- User-drawn polygon with coordinates
+
+#### Usage Patterns:
+```js
+const polygon = await rpc.invoke('getUserDrawnPolygon', []);
+console.log('User drew polygon:', polygon.geometry);
+
+// Use for spatial analysis
+const area = await rpc.invoke('featureArea', [polygon]);
+```
+
+#### Notes:
+- Interactive: waits for user to complete drawing
+- Returns only after user finishes the polygon
+- Useful for custom drawing workflows
+
+### **`getLassoedProjectFeatures()`**
+
+Gets project features (raw sections) within the current lasso selection.
+
+#### Signature:
+```js
+await rpc.invoke('getLassoedProjectFeatures', [])
+```
+
+#### Returns:
+- Array of RawSection features or Lensable features within the lasso
+- Each feature includes geometry and properties
+
+#### Usage Patterns:
+```js
+const featuresInLasso = await rpc.invoke('getLassoedProjectFeatures', []);
+console.log(`${featuresInLasso.length} features in lasso`);
+
+featuresInLasso.forEach(feature => {
+  console.log('Feature:', feature.properties.id);
+});
+```
+
+#### Notes:
+- Requires an active lasso selection
+- Returns user-drawn sections/features, not external layer data
+- Useful for bulk operations on selected features
+
+### **`getLassoedLensedFeatures()`**
+
+Gets features within the lasso selection with lens (data layer) applied.
+
+#### Signature:
+```js
+await rpc.invoke('getLassoedLensedFeatures', [])
+```
+
+#### Returns:
+- Array of Lensable features (from active data layers) within the lasso
+- Includes full feature properties and geometry
+
+#### Usage Patterns:
+```js
+const lensedFeatures = await rpc.invoke('getLassoedLensedFeatures', []);
+console.log(`${lensedFeatures.length} data layer features in lasso`);
+
+// Access data layer attributes
+lensedFeatures.forEach(feature => {
+  console.log('Zoning:', feature.properties.zoning_code);
+});
+```
+
+#### Notes:
+- Requires active lens layer and lasso selection
+- Returns features from external data layers, not user-drawn features
+- Useful for analyzing external data within a selected area
+
+### **`getSelectableProjectFeatures()`**
+
+Gets all project features that can be selected in the current view.
+
+#### Signature:
+```js
+const selectableFeatures = getSelectableProjectFeatures()
+```
+
+#### Returns:
+- Array of RawSection features that are currently selectable
+- Includes visible user-drawn features
+
+#### Usage Patterns:
+```js
+const selectable = getSelectableProjectFeatures();
+console.log(`${selectable.length} selectable features`);
+
+// Filter by criteria
+const buildings = selectable.filter(f => f.properties.type === 'buildingSection');
+```
+
+#### Notes:
+- Returns only features visible in current map view
+- Respects layer visibility and filters
+- Does not require RPC call (synchronous function)
+
+### **`getLensedFeatureMap()`**
+
+Gets a map of features with lens (data visualization) applied.
+
+#### Signature:
+```js
+const featureMap = getLensedFeatureMap()
+```
+
+#### Returns:
+- Map object where keys are feature IDs
+- Values are either Project features or Lensable features depending on active lens
+
+#### Usage Patterns:
+```js
+const featureMap = getLensedFeatureMap();
+
+// Access feature by ID
+const feature = featureMap.get('feature-id');
+console.log('Feature properties:', feature.properties);
+
+// Iterate all features
+featureMap.forEach((feature, id) => {
+  console.log(`${id}:`, feature.properties);
+});
+```
+
+#### Notes:
+- Efficient lookup structure for feature access by ID
+- Includes active lens styling and data transformations
+- Synchronous function, no RPC call needed
+
+### **`createRectangleVista()`**
+
+Creates a new rectangle-based vista (saved view).
+
+#### Signature:
+```js
+await rpc.invoke('createRectangleVista', [])
+```
+
+#### Returns:
+- Promise resolving to a View object with saved map state
+
+#### Notes:
+- ⚠️ This function may create persistent data (mutation)
+- Should be reviewed before automated testing
+- Creates a new saved view in the project
+
+## Map Module Functions
+
+### **`getFeatureState(featureId)`**
+
+Gets the current state object for a specific feature.
+
+#### Signature:
+```js
+await rpc.invoke('getFeatureState', [featureId])
+```
+
+#### Parameters:
+- `featureId`: string or number identifying the feature
+
+#### Returns:
+- State object with current feature state properties
+- May include: `hover`, `selected`, custom state values
+
+#### Usage Patterns:
+```js
+const state = await rpc.invoke('getFeatureState', ['feature-123']);
+console.log('Is hovered:', state.hover);
+console.log('Is selected:', state.selected);
+```
+
+#### Notes:
+- Feature state is used for interactive styling (hover effects, selection highlights)
+- State is ephemeral and not persisted with features
+- See `setFeatureState()` to modify (mutation function)
+
+### **`getMapBounds()`**
+
+Gets the current visible bounds of the map viewport.
+
+#### Signature:
+```js
+await rpc.invoke('getMapBounds', [])
+```
+
+#### Returns:
+- Bounds object or array: `[[west, south], [east, north]]` or `{west, south, east, north}`
+- Coordinates in WGS84 decimal degrees
+
+#### Usage Patterns:
+```js
+const bounds = await rpc.invoke('getMapBounds', []);
+
+// Array format
+if (Array.isArray(bounds)) {
+  const [[west, south], [east, north]] = bounds;
+  console.log(`Visible area: ${west},${south} to ${east},${north}`);
+}
+
+// Object format
+if (bounds.west !== undefined) {
+  console.log(`Bounds: ${bounds.west} to ${bounds.east}`);
+}
+```
+
+#### Notes:
+- Similar to `giraffeState.get('mapView').bounds` but via RPC
+- Prefer `giraffeState.get('mapView')` for synchronous access
+- Useful when you need a point-in-time snapshot
+
+### **`getQueriedFeature()`**
+
+Gets feature information from a previous query operation.
+
+#### Signature:
+```js
+await rpc.invoke('getQueriedFeature', [])
+```
+
+#### Returns:
+- Feature object from the most recent feature query
+- Includes geometry and properties
+
+#### Notes:
+- Returns cached query result
+- May return null if no recent query
+- Use `queryRenderedFeatures()` for new queries
+
+### **`queryRenderedFeatures(point, options)`**
+
+Queries features at a specific point on the map.
+
+#### Signature:
+```js
+await rpc.invoke('queryRenderedFeatures', [point, options])
+```
+
+#### Parameters:
+- `point`: coordinates array `[lng, lat]` or point object
+- `options`: query options object
+  - `layers`: array of layer IDs to query
+  - `filter`: Mapbox filter expression
+
+#### Returns:
+- Array of Feature objects at the queried point
+- Each feature includes geometry, properties, and layer information
+
+#### Usage Patterns:
+```js
+const clickPoint = [-97.7196, 30.2404];
+const features = await rpc.invoke('queryRenderedFeatures', [
+  clickPoint,
+  { layers: ['zoning-layer', 'parcels-layer'] }
+]);
+
+console.log(`Found ${features.length} features at click`);
+features.forEach(f => {
+  console.log(`Layer ${f.layer.id}:`, f.properties);
+});
+```
+
+#### Notes:
+- Queries only currently rendered/visible features
+- Respects layer visibility and zoom constraints
+- Useful for click handlers and spatial queries
+
+## Miscellaneous Functions
+
+### **`featureArea(feature)`**
+
+Calculates the area of a GeoJSON feature.
+
+#### Signature:
+```js
+const area = featureArea(feature)
+```
+
+#### Parameters:
+- `feature`: GeoJSON Feature with Polygon or MultiPolygon geometry
+
+#### Returns:
+- Numeric area value in project units (square feet, square meters, etc.)
+
+#### Usage Patterns:
+```js
+const polygon = giraffeState.get('rawSections').features[0];
+const area = featureArea(polygon);
+console.log(`Area: ${area.toFixed(2)} sq ft`);
+```
+
+#### Notes:
+- Synchronous function (no RPC call)
+- Respects project units from `giraffeState.get('project').properties.units`
+- For LineString features, returns 0
+
+### **`fetchProjectDetails()`**
+
+Fetches detailed project information including metadata and configuration.
+
+#### Signature:
+```js
+await rpc.invoke('fetchProjectDetails', [])
+```
+
+#### Returns:
+- Detailed project object with extended metadata
+- May include: permissions, sharing details, extended properties
+
+#### Usage Patterns:
+```js
+const details = await rpc.invoke('fetchProjectDetails', []);
+console.log('Project details:', details);
+console.log('Permissions:', details.permissions);
+```
+
+#### Notes:
+- More comprehensive than `giraffeState.get('project')`
+- May include server-side computed values
+- Network request required
+
+### **`fetchProjectFiles()`**
+
+Fetches list of files attached to the current project.
+
+#### Signature:
+```js
+await rpc.invoke('fetchProjectFiles', [])
+```
+
+#### Returns:
+- Array of file metadata objects
+- Each file includes: `id`, `name`, `url`, `size`, `type`, `created_at`
+
+#### Usage Patterns:
+```js
+const files = await rpc.invoke('fetchProjectFiles', []);
+console.log(`Project has ${files.length} files`);
+
+files.forEach(file => {
+  console.log(`${file.name} (${file.size} bytes): ${file.url}`);
+});
+```
+
+#### Notes:
+- Includes documents, images, and other attachments
+- URLs may be temporary/signed URLs
+- Use `getTempUrl()` for accessing file contents
+
+### **`fetchVistas()`**
+
+Fetches all vistas (saved views) for the current project.
+
+#### Signature:
+```js
+await rpc.invoke('fetchVistas', [])
+```
+
+#### Returns:
+- Array of View objects with saved camera positions and layer states
+- Similar to `giraffeState.get('views')` but fetched from server
+
+#### Usage Patterns:
+```js
+const vistas = await rpc.invoke('fetchVistas', []);
+console.log(`${vistas.length} saved views`);
+
+vistas.forEach(view => {
+  console.log(`View "${view.name}": zoom ${view.details.camera.zoom}`);
+});
+```
+
+#### Notes:
+- May be more up-to-date than cached state
+- Useful after views are created/modified
+- Prefer `giraffeState.get('views')` for cached access
+
+### **`toProjected(geoJSON, projectOrigin)`**
+
+Converts GeoJSON coordinates from geographic (WGS84) to local projected coordinates (meters).
+
+#### Signature:
+```js
+await rpc.invoke('toProjected', [geoJSON, projectOrigin])
+```
+
+#### Parameters:
+- `geoJSON`: GeoJSON FeatureCollection or Feature
+- `projectOrigin`: `[lng, lat]` reference point
+
+#### Returns:
+- GeoJSON with coordinates converted to meters from origin
+- Suitable for external geometry processing
+
+#### Usage Patterns:
+```js
+const projectOrigin = giraffeState.get('projectOrigin');
+const features = giraffeState.get('rawSections');
+
+const projected = await rpc.invoke('toProjected', [features, projectOrigin]);
+
+// Send to external service that expects meters
+// const result = await externalGeometryAPI(projected);
+```
+
+#### Notes:
+- Essential for external CAD/modeling workflows
+- Maintains feature properties unchanged
+- Use `fromProjected()` to convert back
+
+### **`fromProjected(geoJSON, projectOrigin)`**
+
+Converts GeoJSON coordinates from local projected (meters) back to geographic coordinates.
+
+#### Signature:
+```js
+await rpc.invoke('fromProjected', [projectedGeoJSON, projectOrigin])
+```
+
+#### Parameters:
+- `projectedGeoJSON`: GeoJSON with coordinates in meters from origin
+- `projectOrigin`: `[lng, lat]` reference point
+
+#### Returns:
+- GeoJSON with coordinates converted to WGS84 decimal degrees
+
+#### Usage Patterns:
+```js
+const projectOrigin = giraffeState.get('projectOrigin');
+
+// After processing in external service
+// const processedProjected = await externalAPI(projectedData);
+
+const geographic = await rpc.invoke('fromProjected', [
+  processedProjected,
+  projectOrigin
+]);
+
+// Update features in Giraffe
+geographic.features.forEach(f => {
+  rpc.invoke('updateRawSection', [f]);
+});
+```
+
+#### Notes:
+- Inverse of `toProjected()`
+- Required after external geometry processing
+- Maintains feature properties unchanged
+
+### **`getGeoTiff()`**
+
+Retrieves GeoTIFF raster data for the project.
+
+#### Signature:
+```js
+await rpc.invoke('getGeoTiff', [])
+```
+
+#### Returns:
+- GeoTIFF data or URL to GeoTIFF file
+- Format depends on project configuration
+
+#### Notes:
+- May not be available for all projects
+- Used for terrain/elevation data
+- Check project settings for availability
+
+### **`getGltf()`**
+
+Retrieves the 3D scene as GLTF format.
+
+#### Signature:
+```js
+await rpc.invoke('getGltf', [])
+```
+
+#### Returns:
+- GLTF/GLB 3D model data or URL
+- Includes project geometry as 3D models
+
+#### Usage Patterns:
+```js
+const gltf = await rpc.invoke('getGltf', []);
+// Load in Three.js or other 3D library
+// const loader = new GLTFLoader();
+// loader.parse(gltf, '', (model) => scene.add(model.scene));
+```
+
+#### Notes:
+- Exports user-drawn geometry as 3D models
+- Includes building heights and extrusions
+- Compatible with standard 3D viewers
+
+### **`getPng()`**
+
+Retrieves a PNG image export of the current project view.
+
+#### Signature:
+```js
+await rpc.invoke('getPng', [])
+```
+
+#### Returns:
+- PNG image data or URL
+- Snapshot of current map view
+
+#### Notes:
+- Captures current camera position and visible layers
+- Useful for generating thumbnails or reports
+- Image resolution depends on viewport size
+
+### **`getSceneTransform()`**
+
+Gets transformation parameters for the 3D scene coordinate system.
+
+#### Signature:
+```js
+await rpc.invoke('getSceneTransform', [])
+```
+
+#### Returns:
+- Transformation matrix or parameters object
+- Includes scale, rotation, translation for 3D scene
+
+#### Usage Patterns:
+```js
+const transform = await rpc.invoke('getSceneTransform', []);
+console.log('Scene transform:', transform);
+
+// Apply to 3D models for correct positioning
+```
+
+#### Notes:
+- Required for accurate 3D scene positioning
+- Aligns local coordinates with geographic coordinates
+- Used with `getThreeScene()` and `getGltf()`
+
+### **`getTerrainMeshes()`**
+
+Retrieves terrain mesh data for 3D visualization.
+
+#### Signature:
+```js
+await rpc.invoke('getTerrainMeshes', [])
+```
+
+#### Returns:
+- Array of terrain mesh objects
+- Each mesh includes geometry and elevation data
+
+#### Notes:
+- Provides 3D terrain surface for projects
+- May be empty if no terrain data available
+- Used for accurate 3D site context
+
+### **`getThreeScene()`**
+
+Retrieves the project scene formatted for Three.js.
+
+#### Signature:
+```js
+await rpc.invoke('getThreeScene', [])
+```
+
+#### Returns:
+- Three.js compatible scene data
+- Includes geometries, materials, and scene graph
+
+#### Usage Patterns:
+```js
+const sceneData = await rpc.invoke('getThreeScene', []);
+
+// Load into Three.js
+// const scene = new THREE.Scene();
+// // Parse and add sceneData to scene
+```
+
+#### Notes:
+- Pre-formatted for Three.js library
+- Includes building models and terrain
+- Alternative to `getGltf()` for Three.js workflows
+
+### **`getSourceLayerDetails()`**
+
+Gets metadata about source layers in the project.
+
+#### Signature:
+```js
+await rpc.invoke('getSourceLayerDetails', [])
+```
+
+#### Returns:
+- Array of source layer metadata objects
+- Includes layer names, types, and configuration
+
+#### Notes:
+- Describes available data sources
+- Useful for understanding layer structure
+- Complements `giraffeState.get('projectLayers')`
+
+### **`getTiles()`**
+
+Retrieves tile data or tile configuration for the project.
+
+#### Signature:
+```js
+await rpc.invoke('getTiles', [])
+```
+
+#### Returns:
+- Tile configuration object or tile URLs
+- Vector tile or raster tile information
+
+#### Notes:
+- Low-level tile access
+- Used for custom rendering workflows
+- Most apps don't need direct tile access
+
+### **`getVectorLayerContents()`**
+
+Gets contents of vector layers (alternative to `getLayerContents`).
+
+#### Signature:
+```js
+await rpc.invoke('getVectorLayerContents', [])
+```
+
+#### Returns:
+- GeoJSON FeatureCollection with vector layer features
+
+#### Notes:
+- Similar to `getLayerContents(layerName)`
+- May return all vector layers or require parameters
+- Check implementation for exact behavior
+
+### **`getTeamList()`**
+
+Gets list of teams the current user belongs to.
+
+#### Signature:
+```js
+await rpc.invoke('getTeamList', [])
+```
+
+#### Returns:
+- Array of team objects
+- Each team includes: `id`, `name`, `members`, `permissions`
+
+#### Usage Patterns:
+```js
+const teams = await rpc.invoke('getTeamList', []);
+console.log(`User is in ${teams.length} teams`);
+
+teams.forEach(team => {
+  console.log(`Team: ${team.name} (${team.members.length} members)`);
+});
+```
+
+#### Notes:
+- User/organization specific data
+- Useful for team-based sharing workflows
+- Permissions determine visibility
+
+### **`getUserClaimsJwt()`**
+
+Gets JWT token with user claims and authentication information.
+
+#### Signature:
+```js
+await rpc.invoke('getUserClaimsJwt', [])
+```
+
+#### Returns:
+- JWT token string with encoded user claims
+- Claims include: user ID, email, organization, permissions
+
+#### Usage Patterns:
+```js
+const jwt = await rpc.invoke('getUserClaimsJwt', []);
+
+// Decode JWT (using jwt-decode library or similar)
+// const claims = jwtDecode(jwt);
+// console.log('User:', claims.email);
+// console.log('Org:', claims.org_id);
+```
+
+#### Notes:
+- Used for authenticated API calls to external services
+- Token has expiration time
+- Contains sensitive user information - handle securely
+
+### **`getUrlParams()`**
+
+Gets URL parameters from the current Giraffe session.
+
+#### Signature:
+```js
+await rpc.invoke('getUrlParams', [])
+```
+
+#### Returns:
+- Object with URL parameters as key-value pairs
+
+#### Usage Patterns:
+```js
+const params = await rpc.invoke('getUrlParams', []);
+console.log('URL parameters:', params);
+
+if (params.projectId) {
+  console.log('Project ID from URL:', params.projectId);
+}
+```
+
+#### Notes:
+- Accesses parent window URL parameters
+- Useful for deep linking and state restoration
+- Parameters depend on Giraffe URL structure
+
+### **`getTempUrl()`**
+
+Gets a temporary signed URL for accessing project resources.
+
+#### Signature:
+```js
+await rpc.invoke('getTempUrl', [])
+```
+
+#### Returns:
+- Temporary URL string with authentication token
+- URL expires after specified time period
+
+#### Notes:
+- Used for secure file access
+- Commonly used with project attachments
+- URLs expire (typically 1-24 hours)
+
+## Project Module Functions
+
+### **`getProjectApp(appId)`**
+
+Gets project app data for a specific app ID.
+
+#### Signature:
+```js
+await rpc.invoke('getProjectApp', [appId])
+```
+
+#### Parameters:
+- `appId`: numeric or string app identifier
+
+#### Returns:
+- ProjectApp object with app-specific data
+- Includes `public`, `private`, and configuration data
+
+#### Usage Patterns:
+```js
+const appData = await rpc.invoke('getProjectApp', [1]); // Built-in Giraffe app
+console.log('App name:', appData.appName);
+console.log('Public data:', appData.public);
+
+// Get custom app data
+const customApp = await rpc.invoke('getProjectApp', ['myCustomAppId']);
+```
+
+#### Notes:
+- Alternative to accessing via `giraffeState.get('projectAppsByAppID')[appId]`
+- May be more up-to-date than cached state
+- Use `updateProjectApp()` to modify
+
+### **`getProjectAttachmentPrompt()`**
+
+Gets the prompt/template for project file attachments.
+
+#### Signature:
+```js
+await rpc.invoke('getProjectAttachmentPrompt', [])
+```
+
+#### Returns:
+- String with attachment prompt or configuration object
+- Defines expected attachment types and requirements
+
+#### Notes:
+- Organization-specific configuration
+- May return empty if not configured
+- Used for guided file upload workflows
+
+## Projects Module Functions
+
+### **`getProjectBundle()`**
+
+Gets a complete project data bundle including all related data.
+
+#### Signature:
+```js
+await rpc.invoke('getProjectBundle', [])
+```
+
+#### Returns:
+- Comprehensive project object including:
+  - Project metadata and properties
+  - All features (rawSections, bakedSections)
+  - Layers and layer configuration
+  - Views and vistas
+  - App data
+  - Attachments
+
+#### Usage Patterns:
+```js
+const bundle = await rpc.invoke('getProjectBundle', []);
+console.log('Complete project data:', bundle);
+
+// Export project for backup
+const projectExport = JSON.stringify(bundle);
+```
+
+#### Notes:
+- Large payload - may take time to fetch
+- Useful for project export/backup
+- Includes all project-related data in single call
+
+### **`getProjects()`**
+
+Gets list of all projects accessible to the current user.
+
+#### Signature:
+```js
+await rpc.invoke('getProjects', [])
+```
+
+#### Returns:
+- GeoJSON FeatureCollection with project features
+- Each feature represents a project with boundary geometry
+- Properties include project metadata
+
+#### Usage Patterns:
+```js
+const projects = await rpc.invoke('getProjects', []);
+console.log(`User has access to ${projects.features.length} projects`);
+
+projects.features.forEach(project => {
+  console.log(`Project: ${project.properties.name}`);
+  console.log(`  Org: ${project.properties.org_name}`);
+  console.log(`  Created: ${project.properties.created_at}`);
+});
+```
+
+#### Notes:
+- Similar to `giraffeState.get('projects')` but fetched from server
+- May be more complete/up-to-date than cached state
+- Useful for project browsing/selection UIs
+
+## Layers Module Functions
+
+### **`getLayerPermission(layerName)`**
+
+Gets permission information for a specific layer.
+
+#### Signature:
+```js
+await rpc.invoke('getLayerPermission', [layerName])
+```
+
+#### Parameters:
+- `layerName`: string name of the layer
+
+#### Returns:
+- Permission object with access level information
+- May include: `canView`, `canEdit`, `canShare`, `accessLevel`
+
+#### Usage Patterns:
+```js
+const permission = await rpc.invoke('getLayerPermission', ['Zoning Layer']);
+console.log('Can view:', permission.canView);
+console.log('Can edit:', permission.canEdit);
+
+if (permission.canEdit) {
+  // Allow editing operations
+} else {
+  console.log('Read-only access to layer');
+}
+```
+
+#### Notes:
+- Permissions depend on user role and layer sharing settings
+- Useful for conditional UI (show/hide edit buttons)
+- Layer names must match exactly
+
+## ⚠️ Deferred Functions (Require Human Review)
+
+The following functions modify data, create/delete resources, or change UI state. They have been identified but not executed to preserve project integrity. Each requires manual review and testing.
+
+### Data Mutation Functions
+
+- ⚠️ `createRawSection(feature)` - Creates new feature on map (mutates project data)
+- ⚠️ `createRawSections(features)` - Creates multiple features (bulk mutation)
+- ⚠️ `deleteRawSection(featureId)` - **DELETES feature permanently** (destructive)
+- ⚠️ `updateRawSection(feature)` - Modifies existing feature properties/geometry (mutation)
+- ⚠️ `updateRawSections(features)` - Bulk update of features (mutation)
+- ⚠️ `createProject(projectData)` - Creates new project (persistent creation)
+- ⚠️ `updateProject(projectId, projectData)` - Modifies project properties (mutation)
+- ⚠️ `updateProjectApp(appId, data)` - Modifies app data store (mutation)
+
+### Layer Management Functions
+
+- ⚠️ `addProjectLayer()` - Adds permanent layer to project (persistent mutation)
+- ⚠️ `addTempLayer()` - Adds temporary layer (ephemeral but modifies UI state)
+- ⚠️ `addTempLayerGeoJSON(layerName, geoJSON, config)` - Adds temporary GeoJSON layer (UI mutation)
+- ⚠️ `createGeoJSONLayer()` - Creates new permanent layer (persistent creation)
+- ⚠️ `createLayer()` - Creates new layer (persistent creation)
+- ⚠️ `deleteProjectLayer()` - **DELETES layer permanently** (destructive)
+- ⚠️ `removeTempLayer()` - Removes temporary layer (UI mutation)
+- ⚠️ `updateGeoJSONLayerContents(layerName, geoJSON)` - Updates layer contents (mutation)
+- ⚠️ `updateLayer()` - Updates layer configuration (mutation)
+- ⚠️ `updateLayerStyle(layerName, style)` - Changes layer styling (mutation)
+- ⚠️ `updateTempLayerGeoJSON(layerName, geoJSON)` - Updates temporary layer (UI mutation)
+- ⚠️ `activateDrawingLayer()` - Activates drawing mode (changes UI state)
+- ⚠️ `activateLensLayer(layerName)` - Activates lens view (changes UI state)
+- ⚠️ `deactivateLensLayer()` - Deactivates lens view (changes UI state)
+- ⚠️ `toggleLensLayer()` - Toggles lens on/off (changes UI state)
+- ⚠️ `setTiles()` - Sets tile configuration (mutation)
+
+### Layer Tree Management Functions
+
+- ⚠️ `changeLayerOpacity(layerId, opacity)` - Changes layer opacity (UI mutation)
+- ⚠️ `createLayerGroup()` - Creates new layer group (persistent creation)
+- ⚠️ `moveLayerTreeItemIntoGroup()` - Reorganizes layer tree (mutation)
+- ⚠️ `removeLayerGroup()` - **REMOVES layer group** (destructive)
+- ⚠️ `reorderLayerTreeItem()` - Reorders layer tree (mutation)
+- ⚠️ `activateViewLayers()` - Activates layers for specific view (changes UI state)
+
+### Map State and Interaction Functions
+
+- ⚠️ `setSelectedFeatures(features)` - Changes user selection (UI mutation)
+- ⚠️ `setHighlightedFeatures(features)` - Changes highlighted features (UI mutation)
+- ⚠️ `setFeatureState(featureId, state)` - Sets feature state (ephemeral mutation)
+- ⚠️ `removeFeatureState(featureId)` - Removes feature state (mutation)
+- ⚠️ `setDrawTool(toolConfig)` - Changes active drawing tool (UI mutation)
+- ⚠️ `flyTo(options)` - Animates camera to location (changes viewport)
+- ⚠️ `fitBounds(bounds)` - Fits viewport to bounds (changes viewport)
+
+### UI Control Functions
+
+- ⚠️ `addHtmlPopup(html, coordinates, options)` - Displays HTML popup (UI mutation)
+- ⚠️ `addIframePopup(url, coordinates, options, width, height, closeOnClick)` - Displays iframe popup (UI mutation)
+- ⚠️ `clearSDKPopup()` - Clears SDK popups (UI mutation)
+- ⚠️ `enableBottomBarIframe(url, height)` - Enables bottom bar iframe (UI mutation)
+- ⚠️ `disableBottomBarIframe()` - Disables bottom bar iframe (UI mutation)
+- ⚠️ `enableSecondaryAppOverlay()` - Enables app overlay (UI mutation)
+- ⚠️ `disableSecondaryAppOverlay()` - Disables app overlay (UI mutation)
+- ⚠️ `updateUiLayout()` - Changes UI layout (UI mutation)
+- ⚠️ `setTopView()` - Sets top view mode (changes UI state)
+- ⚠️ `setContextMenuItems()` - Modifies context menu (UI mutation)
+
+### Map Events and Interaction
+
+- ⚠️ `addMapboxEventListener()` - Adds event listener (modifies event handling)
+- ⚠️ `removeMapboxEventListener()` - Removes event listener (modifies event handling)
+- ⚠️ `enableMapContentEvents()` - Enables map content events (changes event handling)
+- ⚠️ `disableMapContentEvents()` - Disables map content events (changes event handling)
+- ⚠️ `enableMapHover()` - Enables map hover (changes interaction)
+- ⚠️ `disableMapHover()` - Disables map hover (changes interaction)
+
+### Project Management Functions
+
+- ⚠️ `shareWithTeam(teamName, projects)` - **SHARES projects with team** (sharing mutation)
+- ⚠️ `syncToProjects(features, nameFunction)` - **SYNCS features to projects** (bulk creation/update)
+- ⚠️ `patchProperties(projectId, properties)` - Updates project metadata (mutation)
+
+### View Creation
+
+- ⚠️ `createRectangleVista()` - Creates new saved view (persistent creation)
+
+### Application Lifecycle
+
+- ⚠️ `readyToClose()` - Signals app ready to close (state change)
+
 ## Notes and Tips
 
 - State vs RPC: use `giraffeState.get(...)` for instantaneous reads of the current app state; use `rpc.invoke(...)` for operations that query, compute, or mutate through the host.
 - Bounds formats: when working with `mapView.bounds`, handle both object and array forms as above.
 - Data layers: contents and availability depend on project configuration and permissions; not all layers are directly queryable.
+- Coordinate systems: Use `projectOrigin` with `toProjected()`/`fromProjected()` for external geometry processing in meters.
+- Safe functions: All functions documented above the ⚠️ section are read-only or network-only and safe for automated testing.
+- Mutation functions: Functions in the ⚠️ section require careful manual review and should only be tested in sandbox environments.
