@@ -1,7 +1,6 @@
 import { functionCatalog, SAFE_ACCESS_TYPES } from './functionCatalog.js';
 
 const MAX_JSON_SNIPPET_LENGTH = 2000;
-const DEFAULT_SNAPSHOT_ENDPOINT = 'http://localhost:4000/api/run-snapshots';
 
 function formatError(error) {
   if (error instanceof Error) {
@@ -35,7 +34,7 @@ function summarizeValue(value) {
   }
   if (typeof value === 'object') {
     const keys = Object.keys(value);
-    return `Object with keys: ${keys.slice(0, 6).join(', ')}${keys.length > 6 ? ' ï¿½' : ''}`;
+    return `Object with keys: ${keys.slice(0, 6).join(', ')}${keys.length > 6 ? ' …' : ''}`;
   }
   if (typeof value === 'string') {
     return `String (${value.length} chars)`;
@@ -57,7 +56,7 @@ function generateMarkdown(entries) {
     }
     lines.push(`- **Category**: ${entry.category}`);
     lines.push(`- **Access**: ${entry.access}${entry.derived ? ' (derived)' : ''}${entry.requiresReview ? ' (human review)' : ''}`);
-    lines.push(`- **Outcome**: ${entry.success ? 'Success' : `Failed ï¿½ ${entry.error}`}`);
+    lines.push(`- **Outcome**: ${entry.success ? 'Success' : `Failed — ${entry.error}`}`);
     lines.push(`- **Summary**: ${entry.summary}`);
     if (entry.notes) {
       lines.push(`- **Notes**: ${entry.notes}`);
@@ -79,7 +78,7 @@ function appendLogEntry(logElement, entry) {
   header.className = 'automation-log-header';
   header.innerHTML = `
     <span class="automation-log-title">${entry.label}</span>
-    <span class="automation-log-meta">${new Date(entry.timestamp).toLocaleTimeString()} ï¿½ ${entry.access}${entry.derived ? ' ï¿½ derived' : ''}</span>
+    <span class="automation-log-meta">${new Date(entry.timestamp).toLocaleTimeString()} • ${entry.access}${entry.derived ? ' • derived' : ''}</span>
   `;
 
   const summary = document.createElement('p');
@@ -109,7 +108,7 @@ function renderHumanReviewList(container, humanReviewItems) {
     <li>
       <strong>${item.label}</strong>
       <span class="badge">${item.access}</span>
-      <div class="note">${item.notes || 'Mutating or external side-effects ï¿½ review before automating.'}</div>
+      <div class="note">${item.notes || 'Mutating or external side-effects — review before automating.'}</div>
     </li>
   `).join('');
 
@@ -136,12 +135,12 @@ function renderCatalogTable(container) {
     <tr>
       <td>${fn.category}</td>
       <td>${fn.label}</td>
-      <td>${fn.sdkCall || 'ï¿½'}</td>
+      <td>${fn.sdkCall || '—'}</td>
       <td>${fn.access}</td>
       <td>${fn.direct ? 'Yes' : 'No'}</td>
       <td>${fn.derived ? 'Yes' : 'No'}</td>
       <td>${fn.requiresReview ? 'Yes' : 'No'}</td>
-      <td>${fn.buttonId || 'ï¿½'}</td>
+      <td>${fn.buttonId || '—'}</td>
       <td>${fn.notes || ''}</td>
     </tr>
   `).join('');
@@ -186,9 +185,6 @@ export function setupAutomationPanel(context) {
     latestById: new Map(),
     isRunning: false
   };
-
-  const snapshotEndpoint = (typeof window !== 'undefined' && window.AUTOMATION_SNAPSHOT_ENDPOINT)
-    || DEFAULT_SNAPSHOT_ENDPOINT;
 
   renderSummary(summaryEl, {
     total: functionCatalog.length,
@@ -235,94 +231,32 @@ export function setupAutomationPanel(context) {
     updateDocPreview();
   }
 
-  function shouldAttemptSnapshot() {
-    if (!docPreviewEl) return false;
-    if (typeof window === 'undefined') return false;
-    if (window.AUTOMATION_DISABLE_SNAPSHOT === true) return false;
-    const isLocalhost = ['localhost', '127.0.0.1'].includes(window.location.hostname);
-    return isLocalhost || Boolean(window.AUTOMATION_SNAPSHOT_ENDPOINT);
-  }
-
-  async function persistDocSnapshot(label) {
-    if (!shouldAttemptSnapshot()) {
-      return { skipped: true, reason: 'Snapshot skipped (non-local environment).' };
-    }
-
-    const markdown = docPreviewEl.value ?? '';
-    if (!markdown.trim()) {
-      return { skipped: true, reason: 'Snapshot skipped (no automation results captured).' };
-    }
-
-    const payload = {
-      label,
-      content: markdown,
-      metadata: {
-        generatedAt: new Date().toISOString(),
-        totalEntries: state.latestById.size
-      }
-    };
-
-    try {
-      const response = await fetch(snapshotEndpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-
-      if (!response.ok) {
-        const message = await response.text();
-        throw new Error(message || `Snapshot endpoint returned ${response.status}`);
-      }
-
-      const result = await response.json();
-      return { skipped: false, result };
-    } catch (error) {
-      throw new Error(`Snapshot request failed: ${error.message}`);
-    }
-  }
-
   async function runSafeFunctions() {
     if (state.isRunning) return;
     state.isRunning = true;
 
     if (statusEl) {
-      statusEl.textContent = `Running ${safeFunctions.length} direct read/network SDK calls.`;
+      statusEl.textContent = `Running ${safeFunctions.length} direct read/network SDK calls…`;
     }
 
-    try {
-      for (const fn of safeFunctions) {
-        if (statusEl) {
-          statusEl.textContent = `Running ${fn.label}.`;
-        }
-        try {
-          const data = await fn.invoke(context);
-          recordResult(fn, { success: true, data });
-        } catch (error) {
-          recordResult(fn, { success: false, error: formatError(error) });
-        }
-      }
-
-      let snapshotMessage = 'Safe run complete.';
-      try {
-        const snapshot = await persistDocSnapshot('safe');
-        if (snapshot?.skipped) {
-          snapshotMessage = `Safe run complete. ${snapshot.reason}`;
-        } else if (snapshot?.result?.relativePath || snapshot?.result?.filename) {
-          const location = snapshot.result.relativePath || snapshot.result.filename;
-          snapshotMessage = `Safe run complete. Snapshot saved as ${location}.`;
-        }
-      } catch (error) {
-        console.warn('Automation snapshot failed', error);
-        snapshotMessage = `Safe run complete. ${error.message}`;
-      }
-
+    for (const fn of safeFunctions) {
       if (statusEl) {
-        statusEl.textContent = snapshotMessage;
+        statusEl.textContent = `Running ${fn.label}…`;
       }
-    } finally {
-      state.isRunning = false;
+      try {
+        const data = await fn.invoke(context);
+        recordResult(fn, { success: true, data });
+      } catch (error) {
+        recordResult(fn, { success: false, error: formatError(error) });
+      }
     }
+
+    if (statusEl) {
+      statusEl.textContent = 'Safe run complete.';
+    }
+    state.isRunning = false;
   }
+
   function clearAutomationLog() {
     state.latestById.clear();
     if (logEl) {

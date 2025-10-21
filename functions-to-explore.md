@@ -4,150 +4,152 @@
 Based on the comprehensive SDK documentation in `docs-condensed.md` and our current exploration in `functionCatalog.js`, I've identified functions that we haven't yet explored. This list categorizes them by module and indicates which ones require human-in-the-loop verification due to their mutative or potentially destructive nature.
 
 ## Already Explored Functions ✅
-- `giraffeState.get('project')` ✅ Documented
-- `giraffeState.get('projects')` ✅ Documented
-- `giraffeState.get('projectLayers')` ✅ Documented
-- `giraffeState.get('rawSections')` ✅ Documented
-- `giraffeState.get('bakedSections')` ✅ Documented
-- `giraffeState.get('mapView')` ✅ Documented
-- `giraffeState.get('mapContent')` ✅ Documented
-- `giraffeState.get('layerTree')` ✅ Documented
-- `giraffeState.get('views')` ✅ Documented
-- `giraffeState.get('selected')` ✅ Documented (Run: 2025-10-02)
-- `giraffeState.get('projectOrigin')` ✅ Documented (Run: 2025-10-02)
-- `giraffeState.get('projectAppsByAppID')` ✅ Documented (Run: 2025-10-02)
-- `giraffeState.get('flows')` ✅ Documented (Run: 2025-10-02)
-- `giraffeState.get('selectedProjectApp')` ✅ Documented (Run: 2025-10-02)
-- `rpc.invoke('getSelectedFeatures', [])` ✅ Documented
-- `rpc.invoke('activateDrawingLayer', [])` ⚠️ DEFERRED (mutation)
-- `rpc.invoke('getAnalyticsResult', [])` ✅ Documented
-- `rpc.invoke('getLayerContents', [layerName])` ✅ Documented
+- `giraffeState.get('project')`
+- `giraffeState.get('projects')`
+- `giraffeState.get('projectLayers')`
+- `giraffeState.get('rawSections')`
+- `giraffeState.get('bakedSections')`
+- `giraffeState.get('mapView')`
+- `giraffeState.get('mapContent')`
+- `giraffeState.get('layerTree')`
+- `giraffeState.get('views')`
+- `rpc.invoke('getSelectedFeatures', [])`
+- `rpc.invoke('activateDrawingLayer', [])`
+- `rpc.invoke('getAnalyticsResult', [])`
+- `rpc.invoke('getLayerContents', [layerName])`
 
 ## Unexplored Functions by Module
 
 ### Commands Module 📋
-- `createRectangleVista()` ⚠️ DEFERRED (creates persistent view)
-- `getLassoedLensedFeatures()` ✅ Documented (Run: 2025-10-02)
-- `getLassoedProjectFeatures()` ✅ Documented (Run: 2025-10-02)
-- `getLassoShape()` ✅ Documented (Run: 2025-10-02)
-- `getLensedFeatureMap()` ✅ Documented (Run: 2025-10-02)
-- `getSelectableProjectFeatures()` ✅ Documented (Run: 2025-10-02)
-- `getUserDrawnPolygon()` ✅ Documented (Run: 2025-10-02)
+- `createRectangleVista()` - Creates a new rectangle vista/view
+- `getLassoedLensedFeatures()` - Gets features within a lasso selection with lens applied
+- `getLassoedProjectFeatures()` - Gets project features within a lasso selection
+- `getLassoShape()` - Gets the lasso shape drawn by user
+- `getLensedFeatureMap()` - Gets feature map with lens applied
+- `getSelectableProjectFeatures()` - Gets features that can be selected in project
+- `getUserDrawnPolygon()` - Gets polygon drawn by user
 
 ### Layers Module 🎨
 #### Read Operations
-- `getLayerPermission(layerName)` ✅ Documented (Run: 2025-10-02)
+- `getLayerPermission(layerName)` - Gets permissions for a specific layer
+- `setTiles()` - Sets tile configuration
 
-#### Mutation Operations (⚠️ All DEFERRED)
-- `setTiles()` ⚠️ DEFERRED (mutation)
-- `activateLensLayer(layerName)` ⚠️ DEFERRED (changes UI state)
-- `addProjectLayer()` ⚠️ DEFERRED (persistent mutation)
-- `addTempLayer()` ⚠️ DEFERRED (UI mutation)
-- `addTempLayerGeoJSON(layerName, geoJSON, config)` ⚠️ DEFERRED (UI mutation)
-- `createGeoJSONLayer()` ⚠️ DEFERRED (persistent creation)
-- `createLayer()` ⚠️ DEFERRED (persistent creation)
-- `deactivateLensLayer()` ⚠️ DEFERRED (changes UI state)
-- `deleteProjectLayer()` ⚠️ DEFERRED (DESTRUCTIVE)
-- `removeTempLayer()` ⚠️ DEFERRED (UI mutation)
-- `toggleLensLayer()` ⚠️ DEFERRED (changes UI state)
-- `updateGeoJSONLayerContents(layerName, geoJSON)` ⚠️ DEFERRED (mutation)
-- `updateLayer()` ⚠️ DEFERRED (mutation)
-- `updateLayerStyle(layerName, style)` ⚠️ DEFERRED (mutation)
-- `updateTempLayerGeoJSON(layerName, geoJSON)` ⚠️ DEFERRED (UI mutation)
+#### Mutation Operations (Need Review)
+- `activateLensLayer(layerName)` - Activates lens mode for a layer
+- `addProjectLayer()` - Adds a new project layer
+- `addTempLayer()` - Adds a temporary layer
+- `addTempLayerGeoJSON(layerName, geoJSON, config)` - Adds temporary GeoJSON layer
+- `createGeoJSONLayer()` - Creates a new GeoJSON layer
+- `createLayer()` - Creates a new layer
+- `deactivateLensLayer()` - Deactivates lens layer
+- `deleteProjectLayer()` - Deletes a project layer
+- `removeTempLayer()` - Removes a temporary layer
+- `toggleLensLayer()` - Toggles lens layer on/off
+- `updateGeoJSONLayerContents(layerName, geoJSON)` - Updates GeoJSON layer contents
+- `updateLayer()` - Updates layer configuration
+- `updateLayerStyle(layerName, style)` - Updates layer styling
+- `updateTempLayerGeoJSON(layerName, geoJSON)` - Updates temporary GeoJSON layer
 
 ### Layer Tree Module 🌳
 #### Read Operations
-- None remaining (all are mutation operations)
+- `activateViewLayers()` - Activates layers for a specific view
 
-#### Mutation Operations (⚠️ All DEFERRED)
-- `activateViewLayers()` ⚠️ DEFERRED (changes UI state)
-- `changeLayerOpacity(layerId, opacity)` ⚠️ DEFERRED (UI mutation)
-- `createLayerGroup()` ⚠️ DEFERRED (persistent creation)
-- `moveLayerTreeItemIntoGroup()` ⚠️ DEFERRED (mutation)
-- `removeLayerGroup()` ⚠️ DEFERRED (DESTRUCTIVE)
-- `reorderLayerTreeItem()` ⚠️ DEFERRED (mutation)
+#### Mutation Operations (Need Review)
+- `changeLayerOpacity(layerId, opacity)` - Changes layer opacity
+- `createLayerGroup()` - Creates a new layer group
+- `moveLayerTreeItemIntoGroup()` - Moves layer tree item into a group
+- `removeLayerGroup()` - Removes a layer group
+- `reorderLayerTreeItem()` - Reorders items in layer tree
 
 ### Map Module 🗺️
 #### Read Operations
-- `getFeatureState(featureId)` ✅ Documented (Run: 2025-10-02)
-- `getMapBounds()` ✅ Documented (Run: 2025-10-02)
-- `getQueriedFeature()` ✅ Documented (Run: 2025-10-02)
-- `queryRenderedFeatures(point, options)` ✅ Documented (Run: 2025-10-02)
+- `getFeatureState(featureId)` - Gets state of a specific feature
+- `getMapBounds()` - Gets current map bounds
+- `getQueriedFeature()` - Gets queried feature information
+- `queryRenderedFeatures(point, options)` - Queries features at a point
 
-#### Mutation Operations (⚠️ All DEFERRED)
-- `addHtmlPopup(html, coordinates, options)` ⚠️ DEFERRED (UI mutation)
-- `addIframePopup(url, coordinates, options, width, height, closeOnClick)` ⚠️ DEFERRED (UI mutation)
-- `clearSDKPopup()` ⚠️ DEFERRED (UI mutation)
-- `fitBounds(bounds)` ⚠️ DEFERRED (changes viewport)
-- `flyTo(options)` ⚠️ DEFERRED (changes viewport)
-- `removeFeatureState(featureId)` ⚠️ DEFERRED (mutation)
-- `setDrawTool(toolConfig)` ⚠️ DEFERRED (UI mutation)
-- `setFeatureState(featureId, state)` ⚠️ DEFERRED (mutation)
-- `setHighlightedFeatures(features)` ⚠️ DEFERRED (UI mutation)
-- `setSelectedFeatures(features)` ⚠️ DEFERRED (UI mutation)
+#### Mutation Operations (Need Review)
+- `addHtmlPopup(html, coordinates, options)` - Adds HTML popup to map
+- `addIframePopup(url, coordinates, options, width, height, closeOnClick)` - Adds iframe popup
+- `clearSDKPopup()` - Clears SDK-created popups
+- `fitBounds(bounds)` - Fits map to specified bounds
+- `flyTo(options)` - Animates map to location
+- `removeFeatureState(featureId)` - Removes state from feature
+- `setDrawTool(toolConfig)` - Sets the active drawing tool
+- `setFeatureState(featureId, state)` - Sets state for a feature
+- `setHighlightedFeatures(features)` - Sets highlighted features
+- `setSelectedFeatures(features)` - Sets selected features
 
 ### Misc Module 🔧
 #### Read Operations
-- `featureArea(feature)` ✅ Documented (Run: 2025-10-02)
-- `fetchProjectDetails()` ✅ Documented (Run: 2025-10-02)
-- `fetchProjectFiles()` ✅ Documented (Run: 2025-10-02)
-- `fetchVistas()` ✅ Documented (Run: 2025-10-02)
-- `fromProjected(geoJSON, projectOrigin)` ✅ Documented (Run: 2025-10-02)
-- `getGeoTiff()` ✅ Documented (Run: 2025-10-02)
-- `getGltf()` ✅ Documented (Run: 2025-10-02)
-- `getPng()` ✅ Documented (Run: 2025-10-02)
-- `getSceneTransform()` ✅ Documented (Run: 2025-10-02)
-- `getSourceLayerDetails()` ✅ Documented (Run: 2025-10-02)
-- `getTeamList()` ✅ Documented (Run: 2025-10-02)
-- `getTempUrl()` ✅ Documented (Run: 2025-10-02)
-- `getTerrainMeshes()` ✅ Documented (Run: 2025-10-02)
-- `getThreeScene()` ✅ Documented (Run: 2025-10-02)
-- `getTiles()` ✅ Documented (Run: 2025-10-02)
-- `getUrlParams()` ✅ Documented (Run: 2025-10-02)
-- `getUserClaimsJwt()` ✅ Documented (Run: 2025-10-02)
-- `getVectorLayerContents()` ✅ Documented (Run: 2025-10-02)
-- `toProjected(geoJSON, projectOrigin)` ✅ Documented (Run: 2025-10-02)
+- `featureArea(feature)` - Calculates area of a feature
+- `fetchProjectDetails()` - Fetches detailed project information
+- `fetchProjectFiles()` - Fetches project files
+- `fetchVistas()` - Fetches project vistas/views
+- `fromProjected(geoJSON, projectOrigin)` - Converts from projected to geographic coordinates
+- `getGeoTiff()` - Gets GeoTIFF data
+- `getGltf()` - Gets GLTF 3D model data
+- `getPng()` - Gets PNG image data
+- `getSceneTransform()` - Gets 3D scene transformation parameters
+- `getSourceLayerDetails()` - Gets details of source layers
+- `getTeamList()` - Gets list of teams
+- `getTempUrl()` - Gets temporary URL for file access
+- `getTerrainMeshes()` - Gets terrain mesh data
+- `getThreeScene()` - Gets Three.js scene data
+- `getTiles()` - Gets tile data
+- `getUrlParams()` - Gets URL parameters
+- `getUserClaimsJwt()` - Gets user claims JWT token
+- `getVectorLayerContents()` - Gets vector layer contents
+- `toProjected(geoJSON, projectOrigin)` - Converts to projected coordinates
 
-#### UI Operations (⚠️ All DEFERRED)
-- `addMapboxEventListener()` ⚠️ DEFERRED (modifies event handling)
-- `disableBottomBarIframe()` ⚠️ DEFERRED (UI mutation)
-- `disableMapContentEvents()` ⚠️ DEFERRED (changes event handling)
-- `disableMapHover()` ⚠️ DEFERRED (changes interaction)
-- `disableSecondaryAppOverlay()` ⚠️ DEFERRED (UI mutation)
-- `enableBottomBarIframe(url, height)` ⚠️ DEFERRED (UI mutation)
-- `enableMapContentEvents()` ⚠️ DEFERRED (changes event handling)
-- `enableMapHover()` ⚠️ DEFERRED (changes interaction)
-- `enableSecondaryAppOverlay()` ⚠️ DEFERRED (UI mutation)
-- `removeMapboxEventListener()` ⚠️ DEFERRED (modifies event handling)
-- `setContextMenuItems()` ⚠️ DEFERRED (UI mutation)
-- `setTopView()` ⚠️ DEFERRED (changes UI state)
-- `updateUiLayout()` ⚠️ DEFERRED (UI mutation)
-- `readyToClose()` ⚠️ DEFERRED (state change)
+#### UI Operations (Need Review)
+- `addMapboxEventListener()` - Adds Mapbox event listener
+- `disableBottomBarIframe()` - Disables bottom bar iframe
+- `disableMapContentEvents()` - Disables map content events
+- `disableMapHover()` - Disables map hover events
+- `disableSecondaryAppOverlay()` - Disables secondary app overlay
+- `enableBottomBarIframe(url, height)` - Enables bottom bar iframe
+- `enableMapContentEvents()` - Enables map content events
+- `enableMapHover()` - Enables map hover events
+- `enableSecondaryAppOverlay()` - Enables secondary app overlay
+- `removeMapboxEventListener()` - Removes Mapbox event listener
+- `setContextMenuItems()` - Sets context menu items
+- `setTopView()` - Sets top view
+- `updateUiLayout()` - Updates UI layout
+- `readyToClose()` - Signals ready to close
 
 ### Project Module 📋
 #### Read Operations
-- `getProjectApp(appId)` ✅ Documented (Run: 2025-10-02)
-- `getProjectAttachmentPrompt()` ✅ Documented (Run: 2025-10-02)
+- `getProjectApp(appId)` - Gets project app data
+- `getProjectAttachmentPrompt()` - Gets project attachment prompt
 
-#### Mutation Operations (⚠️ All DEFERRED)
-- `createRawSection(feature)` ⚠️ DEFERRED (creates new feature)
-- `createRawSections(features)` ⚠️ DEFERRED (bulk creation)
-- `deleteRawSection(featureId)` ⚠️ DEFERRED (DESTRUCTIVE)
-- `updateProjectApp(appId, data)` ⚠️ DEFERRED (mutation)
-- `updateRawSection(feature)` ⚠️ DEFERRED (mutation)
-- `updateRawSections(features)` ⚠️ DEFERRED (bulk mutation)
+#### Mutation Operations (Need Review)
+- `createRawSection(feature)` - Creates new raw section/feature
+- `createRawSections(features)` - Creates multiple raw sections
+- `deleteRawSection(featureId)` - Deletes a raw section
+- `updateProjectApp(appId, data)` - Updates project app data
+- `updateRawSection(feature)` - Updates existing raw section
+- `updateRawSections(features)` - Updates multiple raw sections
 
 ### Projects Module 📁
 #### Read Operations
-- `getProjectBundle()` ✅ Documented (Run: 2025-10-02)
-- `getProjects()` ✅ Documented (Run: 2025-10-02)
+- `getProjectBundle()` - Gets complete project bundle
+- `getProjects()` - Gets list of projects
 
-#### Mutation Operations (⚠️ All DEFERRED)
-- `createProject(projectData)` ⚠️ DEFERRED (persistent creation)
-- `patchProperties(projectId, properties)` ⚠️ DEFERRED (mutation)
-- `shareWithTeam(teamName, projects)` ⚠️ DEFERRED (SHARING MUTATION)
-- `syncToProjects(features, nameFunction)` ⚠️ DEFERRED (BULK SYNC)
-- `updateProject(projectId, projectData)` ⚠️ DEFERRED (mutation)
+#### Mutation Operations (Need Review)
+- `createProject(projectData)` - Creates a new project
+- `patchProperties(projectId, properties)` - Updates project properties
+- `shareWithTeam(teamName, projects)` - Shares projects with team
+- `syncToProjects(features, nameFunction)` - Syncs features to projects
+- `updateProject(projectId, projectData)` - Updates existing project
+
+### Additional GiraffeState Keys 🔄
+#### Read Operations
+- `giraffeState.get('selected')` - Gets selected features
+- `giraffeState.get('projectOrigin')` - Gets project origin coordinates
+- `giraffeState.get('projectAppsByAppID')` - Gets project apps by app ID
+- `giraffeState.get('flows')` - Gets workflow/flow data
+- `giraffeState.get('selectedProjectApp')` - Gets currently selected project app
 
 ---
 
