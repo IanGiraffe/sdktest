@@ -71,6 +71,41 @@ function snapshotStateKeys(giraffeState, keys) {
   return snapshot;
 }
 
+function pickFirstProjectLayerName(giraffeState) {
+	const state = ensureGiraffeState(giraffeState);
+	const layers = state.get('projectLayers');
+	if (!Array.isArray(layers) || layers.length === 0) return '';
+	for (const layer of layers) {
+		const name = layer?.layer_full?.name;
+		const styleType = layer?.layer_full?.style?.type;
+		if (name && styleType !== 'raster') return name;
+	}
+	const fallback = layers[0]?.layer_full?.name || '';
+	return fallback || '';
+}
+
+function promptForLayerName(giraffeState, message = 'Enter layer name') {
+	const def = pickFirstProjectLayerName(giraffeState) || 'My Layer Name';
+	const name = typeof window !== 'undefined' ? window.prompt(message, def) : def;
+	return (name || '').trim();
+}
+
+function promptForJson(message, defaultObj) {
+	const fallback = defaultObj ?? {};
+	const seed = JSON.stringify(fallback, null, 2);
+	const text = typeof window !== 'undefined' ? window.prompt(message, seed) : seed;
+	if (!text) return fallback;
+	try {
+		return JSON.parse(text);
+	} catch (err) {
+		return fallback;
+	}
+}
+
+function sampleFeatureCollection() {
+	return { type: 'FeatureCollection', features: [] };
+}
+
 let viewportLayerInstance = null;
 
 export const functionCatalog = [
@@ -609,6 +644,313 @@ export const functionCatalog = [
       }
       await viewportLayerInstance.deactivate();
       return { message: 'Viewport layer deactivated.' };
+    }
+  }
+  ,
+  // LAYERS (SDK) direct calls wired for the Layers (SDK) tab
+  {
+    id: 'rpc.invoke.activateLensLayer',
+    label: 'rpc.invoke("activateLensLayer", [layerName])',
+    sdkCall: 'rpc.invoke("activateLensLayer", [layerName])',
+    category: 'Layers',
+    access: ACCESS.MUTATION,
+    direct: true,
+    outputId: 'layersSdkOutput',
+    requiresReview: true,
+    invoke: async ({ rpc, giraffeState }) => {
+      const layerName = promptForLayerName(giraffeState, 'Layer name for activateLensLayer');
+      return ensureRPC(rpc).invoke('activateLensLayer', [layerName]);
+    }
+  },
+  {
+    id: 'rpc.invoke.deactivateLensLayer',
+    label: 'rpc.invoke("deactivateLensLayer", [layerName?])',
+    sdkCall: 'rpc.invoke("deactivateLensLayer", [layerName?])',
+    category: 'Layers',
+    access: ACCESS.MUTATION,
+    direct: true,
+    outputId: 'layersSdkOutput',
+    requiresReview: true,
+    invoke: async ({ rpc, giraffeState }) => {
+      const name = promptForLayerName(giraffeState, 'Optional layer name for deactivateLensLayer (leave blank for global)');
+      const args = name ? [name] : [];
+      return ensureRPC(rpc).invoke('deactivateLensLayer', args);
+    }
+  },
+  {
+    id: 'rpc.invoke.toggleLensLayer',
+    label: 'rpc.invoke("toggleLensLayer", [layerName])',
+    sdkCall: 'rpc.invoke("toggleLensLayer", [layerName])',
+    category: 'Layers',
+    access: ACCESS.MUTATION,
+    direct: true,
+    outputId: 'layersSdkOutput',
+    requiresReview: true,
+    invoke: async ({ rpc, giraffeState }) => {
+      const layerName = promptForLayerName(giraffeState, 'Layer name for toggleLensLayer');
+      return ensureRPC(rpc).invoke('toggleLensLayer', [layerName]);
+    }
+  },
+  {
+    id: 'rpc.invoke.addTempLayerGeoJSON',
+    label: 'rpc.invoke("addTempLayerGeoJSON", [name, geojson, style, options])',
+    sdkCall: 'rpc.invoke("addTempLayerGeoJSON", [name, geojson, style, options])',
+    category: 'Layers',
+    access: ACCESS.MUTATION,
+    direct: true,
+    outputId: 'layersSdkOutput',
+    requiresReview: true,
+    invoke: async ({ rpc, giraffeState }) => {
+      const name = typeof window !== 'undefined' ? (window.prompt('Temp layer name', 'Temp Layer') || 'Temp Layer') : 'Temp Layer';
+      const geojson = promptForJson('GeoJSON FeatureCollection for temp layer', sampleFeatureCollection());
+      const style = promptForJson('Optional style object (JSON)', {});
+      const options = promptForJson('Optional options object (JSON)', {});
+      return ensureRPC(rpc).invoke('addTempLayerGeoJSON', [name, geojson, style, options]);
+    }
+  },
+  {
+    id: 'rpc.invoke.updateTempLayerGeoJSON',
+    label: 'rpc.invoke("updateTempLayerGeoJSON", [name, geojson])',
+    sdkCall: 'rpc.invoke("updateTempLayerGeoJSON", [name, geojson])',
+    category: 'Layers',
+    access: ACCESS.MUTATION,
+    direct: true,
+    outputId: 'layersSdkOutput',
+    requiresReview: true,
+    invoke: async ({ rpc, giraffeState }) => {
+      const name = promptForLayerName(giraffeState, 'Temp layer name to update');
+      const geojson = promptForJson('GeoJSON FeatureCollection for update', sampleFeatureCollection());
+      return ensureRPC(rpc).invoke('updateTempLayerGeoJSON', [name, geojson]);
+    }
+  },
+  {
+    id: 'rpc.invoke.removeTempLayer',
+    label: 'rpc.invoke("removeTempLayer", [name])',
+    sdkCall: 'rpc.invoke("removeTempLayer", [name])',
+    category: 'Layers',
+    access: ACCESS.MUTATION,
+    direct: true,
+    outputId: 'layersSdkOutput',
+    requiresReview: true,
+    invoke: async ({ rpc, giraffeState }) => {
+      const name = promptForLayerName(giraffeState, 'Temp layer name to remove');
+      return ensureRPC(rpc).invoke('removeTempLayer', [name]);
+    }
+  },
+  {
+    id: 'rpc.invoke.updateGeoJSONLayerContents',
+    label: 'rpc.invoke("updateGeoJSONLayerContents", [name, geojson])',
+    sdkCall: 'rpc.invoke("updateGeoJSONLayerContents", [name, geojson])',
+    category: 'Layers',
+    access: ACCESS.MUTATION,
+    direct: true,
+    outputId: 'layersSdkOutput',
+    requiresReview: true,
+    invoke: async ({ rpc, giraffeState }) => {
+      const name = promptForLayerName(giraffeState, 'Permanent GeoJSON layer name');
+      const geojson = promptForJson('GeoJSON FeatureCollection for permanent layer update', sampleFeatureCollection());
+      return ensureRPC(rpc).invoke('updateGeoJSONLayerContents', [name, geojson]);
+    }
+  },
+  {
+    id: 'rpc.invoke.updateLayerStyle',
+    label: 'rpc.invoke("updateLayerStyle", [name, style])',
+    sdkCall: 'rpc.invoke("updateLayerStyle", [name, style])',
+    category: 'Layers',
+    access: ACCESS.MUTATION,
+    direct: true,
+    outputId: 'layersSdkOutput',
+    requiresReview: true,
+    invoke: async ({ rpc, giraffeState }) => {
+      const name = promptForLayerName(giraffeState, 'Layer name to style');
+      const style = promptForJson('Style object (JSON)', { showLabels: true });
+      return ensureRPC(rpc).invoke('updateLayerStyle', [name, style]);
+    }
+  },
+  {
+    id: 'rpc.invoke.getLayerPermission',
+    label: 'rpc.invoke("getLayerPermission", [name])',
+    sdkCall: 'rpc.invoke("getLayerPermission", [name])',
+    category: 'Layers',
+    access: ACCESS.READ,
+    direct: true,
+    outputId: 'layersSdkOutput',
+    invoke: async ({ rpc, giraffeState }) => {
+      const name = promptForLayerName(giraffeState, 'Layer name for getLayerPermission');
+      return ensureRPC(rpc).invoke('getLayerPermission', [name]);
+    }
+  },
+  {
+    id: 'rpc.invoke.getLayerContents',
+    label: 'rpc.invoke("getLayerContents", [name])',
+    sdkCall: 'rpc.invoke("getLayerContents", [name])',
+    category: 'Layers',
+    access: ACCESS.READ,
+    direct: true,
+    outputId: 'layersSdkOutput',
+    invoke: async ({ rpc, giraffeState }) => {
+      const name = promptForLayerName(giraffeState, 'Layer name for getLayerContents');
+      return ensureRPC(rpc).invoke('getLayerContents', [name]);
+    }
+  },
+  {
+    id: 'rpc.invoke.createDrawingLayer',
+    label: 'rpc.invoke("createDrawingLayer", [name])',
+    sdkCall: 'rpc.invoke("createDrawingLayer", [name])',
+    category: 'Layers',
+    access: ACCESS.MUTATION,
+    direct: true,
+    outputId: 'layersSdkOutput',
+    requiresReview: true,
+    invoke: async ({ rpc }) => {
+      const name = typeof window !== 'undefined' ? (window.prompt('New drawing layer name', 'New Drawing Layer') || 'New Drawing Layer') : 'New Drawing Layer';
+      return ensureRPC(rpc).invoke('createDrawingLayer', [name]);
+    }
+  },
+  {
+    id: 'rpc.invoke.deleteDrawingLayer',
+    label: 'rpc.invoke("deleteDrawingLayer", [name])',
+    sdkCall: 'rpc.invoke("deleteDrawingLayer", [name])',
+    category: 'Layers',
+    access: ACCESS.MUTATION,
+    direct: true,
+    outputId: 'layersSdkOutput',
+    requiresReview: true,
+    invoke: async ({ rpc, giraffeState }) => {
+      const name = promptForLayerName(giraffeState, 'Drawing layer to delete');
+      return ensureRPC(rpc).invoke('deleteDrawingLayer', [name]);
+    }
+  },
+  {
+    id: 'rpc.invoke.duplicateDrawingLayer',
+    label: 'rpc.invoke("duplicateDrawingLayer", [name, newName])',
+    sdkCall: 'rpc.invoke("duplicateDrawingLayer", [name, newName])',
+    category: 'Layers',
+    access: ACCESS.MUTATION,
+    direct: true,
+    outputId: 'layersSdkOutput',
+    requiresReview: true,
+    invoke: async ({ rpc, giraffeState }) => {
+      const name = promptForLayerName(giraffeState, 'Drawing layer to duplicate');
+      const newName = typeof window !== 'undefined' ? (window.prompt('New name for duplicate', `${name || 'Layer'} Copy`) || `${name || 'Layer'} Copy`) : `${name || 'Layer'} Copy`;
+      return ensureRPC(rpc).invoke('duplicateDrawingLayer', [name, newName]);
+    }
+  },
+  {
+    id: 'rpc.invoke.renameDrawingLayer',
+    label: 'rpc.invoke("renameDrawingLayer", [oldName, newName])',
+    sdkCall: 'rpc.invoke("renameDrawingLayer", [oldName, newName])',
+    category: 'Layers',
+    access: ACCESS.MUTATION,
+    direct: true,
+    outputId: 'layersSdkOutput',
+    requiresReview: true,
+    invoke: async ({ rpc, giraffeState }) => {
+      const oldName = promptForLayerName(giraffeState, 'Current drawing layer name');
+      const newName = typeof window !== 'undefined' ? (window.prompt('New drawing layer name', `${oldName || 'Layer'} Renamed`) || `${oldName || 'Layer'} Renamed`) : `${oldName || 'Layer'} Renamed`;
+      return ensureRPC(rpc).invoke('renameDrawingLayer', [oldName, newName]);
+    }
+  },
+  {
+    id: 'rpc.invoke.addTempLayer',
+    label: 'rpc.invoke("addTempLayer", [config])',
+    sdkCall: 'rpc.invoke("addTempLayer", [config])',
+    category: 'Layers',
+    access: ACCESS.MUTATION,
+    direct: true,
+    outputId: 'layersSdkOutput',
+    requiresReview: true,
+    invoke: async ({ rpc, giraffeState }) => {
+      const name = promptForLayerName(giraffeState, 'Temp layer name');
+      const def = { name, featureCollection: sampleFeatureCollection() };
+      const config = promptForJson('Temp layer config (JSON)', def);
+      return ensureRPC(rpc).invoke('addTempLayer', [config]);
+    }
+  },
+  {
+    id: 'rpc.invoke.createGeoJSONLayer',
+    label: 'rpc.invoke("createGeoJSONLayer", [name, geojson])',
+    sdkCall: 'rpc.invoke("createGeoJSONLayer", [name, geojson])',
+    category: 'Layers',
+    access: ACCESS.MUTATION,
+    direct: true,
+    outputId: 'layersSdkOutput',
+    requiresReview: true,
+    invoke: async ({ rpc }) => {
+      const name = typeof window !== 'undefined' ? (window.prompt('New GeoJSON layer name', 'New GeoJSON Layer') || 'New GeoJSON Layer') : 'New GeoJSON Layer';
+      const geojson = promptForJson('GeoJSON FeatureCollection (JSON)', sampleFeatureCollection());
+      return ensureRPC(rpc).invoke('createGeoJSONLayer', [name, geojson]);
+    }
+  },
+  {
+    id: 'rpc.invoke.createLayer',
+    label: 'rpc.invoke("createLayer", [config])',
+    sdkCall: 'rpc.invoke("createLayer", [config])',
+    category: 'Layers',
+    access: ACCESS.MUTATION,
+    direct: true,
+    outputId: 'layersSdkOutput',
+    requiresReview: true,
+    invoke: async ({ rpc }) => {
+      const config = promptForJson('Generic layer config (JSON)', { name: 'New Layer' });
+      return ensureRPC(rpc).invoke('createLayer', [config]);
+    }
+  },
+  {
+    id: 'rpc.invoke.addProjectLayer',
+    label: 'rpc.invoke("addProjectLayer", [config])',
+    sdkCall: 'rpc.invoke("addProjectLayer", [config])',
+    category: 'Layers',
+    access: ACCESS.MUTATION,
+    direct: true,
+    outputId: 'layersSdkOutput',
+    requiresReview: true,
+    invoke: async ({ rpc }) => {
+      const config = promptForJson('Project layer config (JSON)', { name: 'New Project Layer' });
+      return ensureRPC(rpc).invoke('addProjectLayer', [config]);
+    }
+  },
+  {
+    id: 'rpc.invoke.deleteProjectLayer',
+    label: 'rpc.invoke("deleteProjectLayer", [name])',
+    sdkCall: 'rpc.invoke("deleteProjectLayer", [name])',
+    category: 'Layers',
+    access: ACCESS.MUTATION,
+    direct: true,
+    outputId: 'layersSdkOutput',
+    requiresReview: true,
+    invoke: async ({ rpc, giraffeState }) => {
+      const name = promptForLayerName(giraffeState, 'Project layer to delete');
+      return ensureRPC(rpc).invoke('deleteProjectLayer', [name]);
+    }
+  },
+  {
+    id: 'rpc.invoke.updateLayer',
+    label: 'rpc.invoke("updateLayer", [name, patch])',
+    sdkCall: 'rpc.invoke("updateLayer", [name, patch])',
+    category: 'Layers',
+    access: ACCESS.MUTATION,
+    direct: true,
+    outputId: 'layersSdkOutput',
+    requiresReview: true,
+    invoke: async ({ rpc, giraffeState }) => {
+      const name = promptForLayerName(giraffeState, 'Layer name to update');
+      const patch = promptForJson('Layer patch (JSON)', { visible: true });
+      return ensureRPC(rpc).invoke('updateLayer', [name, patch]);
+    }
+  },
+  {
+    id: 'rpc.invoke.setTiles',
+    label: 'rpc.invoke("setTiles", [config])',
+    sdkCall: 'rpc.invoke("setTiles", [config])',
+    category: 'Layers',
+    access: ACCESS.MUTATION,
+    direct: true,
+    outputId: 'layersSdkOutput',
+    requiresReview: true,
+    invoke: async ({ rpc }) => {
+      const config = promptForJson('Tiles config (JSON)', { tiles: ['https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'] });
+      return ensureRPC(rpc).invoke('setTiles', [config]);
     }
   }
 ];

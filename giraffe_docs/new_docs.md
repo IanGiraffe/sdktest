@@ -811,6 +811,42 @@ The `properties` object contains layer-specific attribute data which varies depe
   - Effect: Activates the drawing layer/tools in the host app.
   - Returns: Status/result object (implementation-specific).
 
+### **`activateLensLayer`**
+  - Usage: `await rpc.invoke('activateLensLayer', [layerName])`
+  - Behavior: Opens the lens table for the specified feature layer in the host application.
+  - Requirements: The target layer must be enabled (visible) in the current project for the lens to activate.
+  - Args: `layerName` (string) — display name of a vector/feature layer in the project.
+  - Returns: Status/result object (implementation-specific).
+
+### **`createLayer`**
+  - Usage: `await rpc.invoke('createLayer', [config])`
+  - Behavior: Creates a new layer in the organization’s Layer Library. This does not add the layer to the current project; it becomes available in the library for users to add into any project later with `addProjectLayer`.
+  - Args: `config` (object) — initial layer configuration (e.g., `name`, `description`, type/style fields as applicable).
+  - Returns: A layer metadata object describing the newly created library layer.
+
+  Example response:
+
+  ```json
+  {
+    "id": 38244,
+    "name": "New Layer",
+    "public": false,
+    "protected": false,
+    "description": "New Layer",
+    "tags": null,
+    "meta": null,
+    "data_date": null,
+    "default_group": null,
+    "layer_type": 0,
+    "created_at": "2025-11-01T03:47:44.703800+00:00",
+    "org_id": 1,
+    "org_name": null,
+    "style": null,
+    "vector_style": null,
+    "vector_source": null
+  }
+  ```
+
 ### **`addTempLayerGeoJSON`**
   - Usage: `await rpc.invoke('addTempLayerGeoJSON', [name, geojson, style, options])`
   - Args:
