@@ -90,6 +90,21 @@ function promptForLayerName(giraffeState, message = 'Enter layer name') {
 	return (name || '').trim();
 }
 
+function pickFirstViewName(giraffeState) {
+	const state = ensureGiraffeState(giraffeState);
+	const views = state.get('views');
+	if (Array.isArray(views) && views.length) {
+		return (views[0]?.name || views[0]?.id || '').toString();
+	}
+	return '';
+}
+
+function promptForViewName(giraffeState, message = 'Enter view name') {
+	const def = pickFirstViewName(giraffeState) || 'Default View';
+	const value = typeof window !== 'undefined' ? window.prompt(message, def) : def;
+	return (value || '').trim();
+}
+
 function promptForJson(message, defaultObj) {
 	const fallback = defaultObj ?? {};
 	const seed = JSON.stringify(fallback, null, 2);
@@ -954,5 +969,107 @@ export const functionCatalog = [
     }
   }
 ];
+
+// LAYER TREE (SDK) direct calls wired for the Layer Tree tab
+export const layerTreeCatalogExtensions = [
+	{
+		id: 'rpc.invoke.activateViewLayers',
+		label: 'rpc.invoke("activateViewLayers", [viewName])',
+		sdkCall: 'rpc.invoke("activateViewLayers", [viewName])',
+		category: 'Layer Tree',
+		access: ACCESS.MUTATION,
+		direct: true,
+		outputId: 'layerTreeOutput',
+		requiresReview: true,
+		invoke: async ({ rpc, giraffeState }) => {
+			const viewName = promptForViewName(giraffeState, 'View name for activateViewLayers');
+			return ensureRPC(rpc).invoke('activateViewLayers', [viewName]);
+		}
+	},
+	{
+		id: 'rpc.invoke.changeLayerOpacity',
+		label: 'rpc.invoke("changeLayerOpacity", [layerName, opacity])',
+		sdkCall: 'rpc.invoke("changeLayerOpacity", [layerName, opacity])',
+		category: 'Layer Tree',
+		access: ACCESS.MUTATION,
+		direct: true,
+		outputId: 'layerTreeOutput',
+		requiresReview: true,
+		invoke: async ({ rpc, giraffeState }) => {
+			const layerName = promptForLayerName(giraffeState, 'Layer name for changeLayerOpacity');
+			const def = '0.75';
+			const raw = typeof window !== 'undefined' ? (window.prompt('Opacity (0-1)', def) || def) : def;
+			let opacity = Number.parseFloat(raw);
+			if (!Number.isFinite(opacity)) opacity = 1;
+			opacity = Math.max(0, Math.min(1, opacity));
+			return ensureRPC(rpc).invoke('changeLayerOpacity', [layerName, opacity]);
+		}
+	},
+	{
+		id: 'rpc.invoke.createLayerGroup',
+		label: 'rpc.invoke("createLayerGroup", [config])',
+		sdkCall: 'rpc.invoke("createLayerGroup", [config])',
+		category: 'Layer Tree',
+		access: ACCESS.MUTATION,
+		direct: true,
+		outputId: 'layerTreeOutput',
+		requiresReview: true,
+		invoke: async ({ rpc }) => {
+			const config = promptForJson('Layer group config (JSON)', { name: 'New Group' });
+			return ensureRPC(rpc).invoke('createLayerGroup', [config]);
+		}
+	},
+	{
+		id: 'rpc.invoke.moveLayerTreeItemIntoGroup',
+		label: 'rpc.invoke("moveLayerTreeItemIntoGroup", [itemName, targetGroupName])',
+		sdkCall: 'rpc.invoke("moveLayerTreeItemIntoGroup", [itemName, targetGroupName])',
+		category: 'Layer Tree',
+		access: ACCESS.MUTATION,
+		direct: true,
+		outputId: 'layerTreeOutput',
+		requiresReview: true,
+		invoke: async ({ rpc }) => {
+			const itemName = typeof window !== 'undefined' ? (window.prompt('Item name to move', '') || '').trim() : '';
+			const targetGroup = typeof window !== 'undefined' ? (window.prompt('Target group name', '') || '').trim() : '';
+			return ensureRPC(rpc).invoke('moveLayerTreeItemIntoGroup', [itemName, targetGroup]);
+		}
+	},
+	{
+		id: 'rpc.invoke.removeLayerGroup',
+		label: 'rpc.invoke("removeLayerGroup", [groupName])',
+		sdkCall: 'rpc.invoke("removeLayerGroup", [groupName])',
+		category: 'Layer Tree',
+		access: ACCESS.MUTATION,
+		direct: true,
+		outputId: 'layerTreeOutput',
+		requiresReview: true,
+		invoke: async ({ rpc }) => {
+			const groupName = typeof window !== 'undefined' ? (window.prompt('Layer group name to remove', '') || '').trim() : '';
+			return ensureRPC(rpc).invoke('removeLayerGroup', [groupName]);
+		}
+	},
+	{
+		id: 'rpc.invoke.reorderLayerTreeItem',
+		label: 'rpc.invoke("reorderLayerTreeItem", [itemName, newIndex])',
+		sdkCall: 'rpc.invoke("reorderLayerTreeItem", [itemName, newIndex])',
+		category: 'Layer Tree',
+		access: ACCESS.MUTATION,
+		direct: true,
+		outputId: 'layerTreeOutput',
+		requiresReview: true,
+		invoke: async ({ rpc }) => {
+			const itemName = typeof window !== 'undefined' ? (window.prompt('Item name to reorder', '') || '').trim() : '';
+			const defIdx = '0';
+			const rawIdx = typeof window !== 'undefined' ? (window.prompt('New index (0-based)', defIdx) || defIdx) : defIdx;
+			let newIndex = Number.parseInt(rawIdx, 10);
+			if (!Number.isFinite(newIndex)) newIndex = 0;
+			return ensureRPC(rpc).invoke('reorderLayerTreeItem', [itemName, newIndex]);
+		}
+	}
+];
+
+// Merge into main catalog for consumers expecting a single list
+export const mergedFunctionCatalog = [...functionCatalog, ...layerTreeCatalogExtensions];
+functionCatalog.push(...layerTreeCatalogExtensions);
 
 export const SAFE_ACCESS_TYPES = new Set([ACCESS.READ, ACCESS.NETWORK]);

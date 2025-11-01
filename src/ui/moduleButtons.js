@@ -63,12 +63,12 @@ export function renderSdkModules(context) {
       containerId: 'layerTreeButtons',
       outputId: 'layerTreeOutput',
       items: [
-        { name: 'activateViewLayers' },
-        { name: 'changeLayerOpacity' },
-        { name: 'createLayerGroup' },
-        { name: 'moveLayerTreeItemIntoGroup' },
-        { name: 'removeLayerGroup' },
-        { name: 'reorderLayerTreeItem' }
+        { name: 'activateViewLayers', handler: makeHandler(byId.get('rpc.invoke.activateViewLayers')) },
+        { name: 'changeLayerOpacity', handler: makeHandler(byId.get('rpc.invoke.changeLayerOpacity')) },
+        { name: 'createLayerGroup', handler: makeHandler(byId.get('rpc.invoke.createLayerGroup')) },
+        { name: 'moveLayerTreeItemIntoGroup', handler: makeHandler(byId.get('rpc.invoke.moveLayerTreeItemIntoGroup')) },
+        { name: 'removeLayerGroup', handler: makeHandler(byId.get('rpc.invoke.removeLayerGroup')) },
+        { name: 'reorderLayerTreeItem', handler: makeHandler(byId.get('rpc.invoke.reorderLayerTreeItem')) }
       ]
     },
     {

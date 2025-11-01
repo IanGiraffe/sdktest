@@ -1,4 +1,4 @@
-now - lets explore the remaining functions  within the `Layers (SDK)` Module:
+now - lets explore the remaining functions  within the `MODULE` Module:
 ```
 list of functions
 ```
