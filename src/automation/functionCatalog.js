@@ -130,6 +130,66 @@ export const functionCatalog = [
     invoke: async ({ rpc }) => ensureRPC(rpc).invoke('getSelectedFeatures', [])
   },
   {
+    id: 'rpc.invoke.getLassoedLensedFeatures',
+    label: 'rpc.invoke("getLassoedLensedFeatures", [])',
+    sdkCall: 'rpc.invoke("getLassoedLensedFeatures", [])',
+    category: 'Commands',
+    access: ACCESS.READ,
+    direct: true,
+    outputId: 'commandsOutput',
+    invoke: async ({ rpc }) => ensureRPC(rpc).invoke('getLassoedLensedFeatures', [])
+  },
+  {
+    id: 'rpc.invoke.getLassoedProjectFeatures',
+    label: 'rpc.invoke("getLassoedProjectFeatures", [])',
+    sdkCall: 'rpc.invoke("getLassoedProjectFeatures", [])',
+    category: 'Commands',
+    access: ACCESS.READ,
+    direct: true,
+    outputId: 'commandsOutput',
+    invoke: async ({ rpc }) => ensureRPC(rpc).invoke('getLassoedProjectFeatures', [])
+  },
+  {
+    id: 'rpc.invoke.getLassoShape',
+    label: 'rpc.invoke("getLassoShape", [])',
+    sdkCall: 'rpc.invoke("getLassoShape", [])',
+    category: 'Commands',
+    access: ACCESS.READ,
+    direct: true,
+    outputId: 'commandsOutput',
+    invoke: async ({ rpc }) => ensureRPC(rpc).invoke('getLassoShape', [])
+  },
+  {
+    id: 'rpc.invoke.getLensedFeatureMap',
+    label: 'rpc.invoke("getLensedFeatureMap", [])',
+    sdkCall: 'rpc.invoke("getLensedFeatureMap", [])',
+    category: 'Commands',
+    access: ACCESS.READ,
+    direct: true,
+    outputId: 'commandsOutput',
+    invoke: async ({ rpc }) => ensureRPC(rpc).invoke('getLensedFeatureMap', [])
+  },
+  {
+    id: 'rpc.invoke.getSelectableProjectFeatures',
+    label: 'rpc.invoke("getSelectableProjectFeatures", [])',
+    sdkCall: 'rpc.invoke("getSelectableProjectFeatures", [])',
+    category: 'Commands',
+    access: ACCESS.READ,
+    direct: true,
+    outputId: 'commandsOutput',
+    invoke: async ({ rpc }) => ensureRPC(rpc).invoke('getSelectableProjectFeatures', [])
+  },
+  {
+    id: 'rpc.invoke.getUserDrawnPolygon',
+    label: 'rpc.invoke("getUserDrawnPolygon", [])',
+    sdkCall: 'rpc.invoke("getUserDrawnPolygon", [])',
+    category: 'Commands',
+    access: ACCESS.READ,
+    direct: true,
+    outputId: 'commandsOutput',
+    invoke: async ({ rpc }) => ensureRPC(rpc).invoke('getUserDrawnPolygon', [])
+  },
+  {
     id: 'giraffeState.get.mapContent',
     label: 'giraffeState.get("mapContent")',
     sdkCall: 'giraffeState.get("mapContent")',

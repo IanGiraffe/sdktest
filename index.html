@@ -8,9 +8,21 @@
 </head>
 <body>
     <div class="container">
-        <h1>Giraffe SDK Test App</h1>
+        <div class="function-search">
+            <input id="functionSearch" type="text" placeholder="Search functions (e.g., getSelectedFeatures)" spellcheck="false" />
+            <div id="functionSearchResults" class="function-search-results" aria-live="polite"></div>
+        </div>
 
         <div class="tabs" role="tablist">
+            <button class="tab" data-target="#tab-commands" role="tab" aria-selected="false">Commands</button>
+            <button class="tab" data-target="#tab-data" role="tab" aria-selected="false">Data</button>
+            <button class="tab" data-target="#tab-layers-sdk" role="tab" aria-selected="false">Layers (SDK)</button>
+            <button class="tab" data-target="#tab-layertree" role="tab" aria-selected="false">Layer Tree</button>
+            <button class="tab" data-target="#tab-map-sdk" role="tab" aria-selected="false">Map (SDK)</button>
+            <button class="tab" data-target="#tab-misc" role="tab" aria-selected="false">Misc</button>
+            <button class="tab" data-target="#tab-project-sdk" role="tab" aria-selected="false">Project (SDK)</button>
+            <button class="tab" data-target="#tab-projects-sdk" role="tab" aria-selected="false">Projects (SDK)</button>
+            <button class="tab" data-target="#tab-custom" role="tab" aria-selected="false">Custom</button>
             <button class="tab active" data-target="#tab-project" role="tab" aria-selected="true">Project</button>
             <button class="tab" data-target="#tab-map" role="tab" aria-selected="false">Map</button>
             <button class="tab" data-target="#tab-layers" role="tab" aria-selected="false">Layers</button>
@@ -19,6 +31,59 @@
             <button class="tab" data-target="#tab-viewport" role="tab" aria-selected="false">Viewport</button>
             <button class="tab" data-target="#tab-analytics" role="tab" aria-selected="false">Analytics</button>
             <button class="tab" data-target="#tab-automation" role="tab" aria-selected="false">Automation</button>
+        </div>
+
+        <div id="tab-commands" class="tab-content section" role="tabpanel" hidden>
+            <h2>Commands</h2>
+            <div id="commandsButtons" class="button-grid"></div>
+            <div id="commandsOutput" class="output" aria-live="polite"></div>
+        </div>
+
+        <div id="tab-data" class="tab-content section" role="tabpanel" hidden>
+            <h2>Data</h2>
+            <p class="tab-description">The Data module exports types, interfaces, and classes — no invocable functions.</p>
+        </div>
+
+        <div id="tab-layers-sdk" class="tab-content section" role="tabpanel" hidden>
+            <h2>Layers (SDK)</h2>
+            <div id="layersSdkButtons" class="button-grid"></div>
+            <div id="layersSdkOutput" class="output" aria-live="polite"></div>
+        </div>
+
+        <div id="tab-layertree" class="tab-content section" role="tabpanel" hidden>
+            <h2>Layer Tree</h2>
+            <div id="layerTreeButtons" class="button-grid"></div>
+            <div id="layerTreeOutput" class="output" aria-live="polite"></div>
+        </div>
+
+        <div id="tab-map-sdk" class="tab-content section" role="tabpanel" hidden>
+            <h2>Map (SDK)</h2>
+            <div id="mapSdkButtons" class="button-grid"></div>
+            <div id="mapSdkOutput" class="output" aria-live="polite"></div>
+        </div>
+
+        <div id="tab-misc" class="tab-content section" role="tabpanel" hidden>
+            <h2>Misc</h2>
+            <div id="miscButtons" class="button-grid"></div>
+            <div id="miscOutput" class="output" aria-live="polite"></div>
+        </div>
+
+        <div id="tab-project-sdk" class="tab-content section" role="tabpanel" hidden>
+            <h2>Project (SDK)</h2>
+            <div id="projectSdkButtons" class="button-grid"></div>
+            <div id="projectSdkOutput" class="output" aria-live="polite"></div>
+        </div>
+
+        <div id="tab-projects-sdk" class="tab-content section" role="tabpanel" hidden>
+            <h2>Projects (SDK)</h2>
+            <div id="projectsSdkButtons" class="button-grid"></div>
+            <div id="projectsSdkOutput" class="output" aria-live="polite"></div>
+        </div>
+
+        <div id="tab-custom" class="tab-content section" role="tabpanel" hidden>
+            <h2>Custom (Derived)</h2>
+            <div id="customButtons" class="button-grid"></div>
+            <div id="customOutput" class="output" aria-live="polite"></div>
         </div>
 
         <div id="tab-project" class="tab-content section active" role="tabpanel">

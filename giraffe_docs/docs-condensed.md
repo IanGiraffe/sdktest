@@ -249,8 +249,7 @@ AdvancedFeatureFilter
 Defined in libs/gi-types/src/filters/advanced-filters.ts:9
 new AdvancedFeatureFilter(): AdvancedFeatureFilter
 Returns AdvancedFeatureFilter
-Defined in libs/gi-types/src/filters/advanced-filters.ts:11
-Defined in libs/gi-types/src/filters/advanced-filters.ts:10
+
 GiraffeState
 Class GiraffeState
 ####### Index
@@ -260,10 +259,7 @@ Methods
 Defined in libs/iframe-sdk/src/lib/iframe-sdk.ts:159
 new GiraffeState(): GiraffeState
 Returns GiraffeStateDefined in libs/iframe-sdk/src/lib/iframe-sdk.ts:160
-Defined in libs/iframe-sdk/src/lib/iframe-sdk.ts:160
-Defined in libs/iframe-sdk/src/lib/iframe-sdk.ts:160
-Defined in libs/iframe-sdk/src/lib/iframe-sdk.ts:163
-Defined in libs/iframe-sdk/src/lib/iframe-sdk.ts:186
+
 addListener(keys, listener): string
 Parameterskeys: GiraffeStateEventKey[]listener: ((key: GiraffeStateEventKey, event: MessageEvent<any>) => void)(key, event): voidParameterskey: GiraffeStateEventKeyevent: MessageEvent<any>Returns voidReturns stringDefined in libs/iframe-sdk/src/lib/iframe-sdk.ts:196
 keys: GiraffeStateEventKey[]
@@ -332,33 +328,20 @@ Parameterskey: "selectedProjectApp"Returns GiraffeProjectApp | OtherProjectApp<R
 key: "selectedProjectApp"
 Defined in libs/iframe-sdk/src/lib/iframe-sdk.ts:177
 Parameterskey: "views"Returns View[]Defined in libs/iframe-sdk/src/lib/iframe-sdk.ts:178
-Defined in libs/iframe-sdk/src/lib/iframe-sdk.ts:178
-Defined in libs/iframe-sdk/src/lib/iframe-sdk.ts:165
-Defined in libs/iframe-sdk/src/lib/iframe-sdk.ts:166
-Defined in libs/iframe-sdk/src/lib/iframe-sdk.ts:167
-Defined in libs/iframe-sdk/src/lib/iframe-sdk.ts:168
+
 key: "bakedSections"
-Defined in libs/iframe-sdk/src/lib/iframe-sdk.ts:169
 key: "projectLayers"
-Defined in libs/iframe-sdk/src/lib/iframe-sdk.ts:170
-Defined in libs/iframe-sdk/src/lib/iframe-sdk.ts:171
-Defined in libs/iframe-sdk/src/lib/iframe-sdk.ts:172
+
 key: "projectOrigin"
-Defined in libs/iframe-sdk/src/lib/iframe-sdk.ts:173
 key: "projectAppsByAppID"
-Defined in libs/iframe-sdk/src/lib/iframe-sdk.ts:174
-Defined in libs/iframe-sdk/src/lib/iframe-sdk.ts:175
-Defined in libs/iframe-sdk/src/lib/iframe-sdk.ts:176
+
 key: "selectedProjectApp"
-Defined in libs/iframe-sdk/src/lib/iframe-sdk.ts:177
-Defined in libs/iframe-sdk/src/lib/iframe-sdk.ts:178
+
 Returns voidDefined in libs/iframe-sdk/src/lib/iframe-sdk.ts:213
-Defined in libs/iframe-sdk/src/lib/iframe-sdk.ts:213
-Defined in libs/iframe-sdk/src/lib/iframe-sdk.ts:213
+
 removeAllListeners(): void
 Returns voidDefined in libs/iframe-sdk/src/lib/iframe-sdk.ts:209
-Defined in libs/iframe-sdk/src/lib/iframe-sdk.ts:209
-Defined in libs/iframe-sdk/src/lib/iframe-sdk.ts:209
+
 removeListener(listenerKey): void
 ParameterslistenerKey: anyReturns voidDefined in libs/iframe-sdk/src/lib/iframe-sdk.ts:205
 Defined in libs/iframe-sdk/src/lib/iframe-sdk.ts:205
@@ -373,19 +356,12 @@ CategoricalPalette
 Interface CategoricalPalette
 ####### Index
 Properties
-Defined in libs/gi-types/src/kanbans.ts:101
-Defined in libs/gi-types/src/kanbans.ts:105
-Defined in libs/gi-types/src/kanbans.ts:107
-Defined in libs/gi-types/src/kanbans.ts:106
-Defined in libs/gi-types/src/kanbans.ts:104
-Defined in libs/gi-types/src/kanbans.ts:102
-Defined in libs/gi-types/src/kanbans.ts:103
+
 FixedColor
 Interface FixedColor
 ####### Index
 Properties
 Defined in libs/gi-types/src/kanbans.ts:110
-Defined in libs/gi-types/src/kanbans.ts:111
 GiraffeProjectApp
 Interface GiraffeProjectApp
 ####### Index
@@ -402,58 +378,19 @@ Inherited from OtherProjectApp.project
 Overrides OtherProjectApp.public
 Inherited from OtherProjectApp.readMe
 OtherProjectAppGiraffeProjectApp
-Defined in libs/gi-types/src/project-apps.ts:48
-Defined in libs/gi-types/src/project-apps.ts:12
-Defined in libs/gi-types/src/project-apps.ts:13
-Defined in libs/gi-types/src/project-apps.ts:37
-Defined in libs/gi-types/src/project-apps.ts:50
-Defined in libs/gi-types/src/project-apps.ts:9
-Defined in libs/gi-types/src/project-apps.ts:33
-Defined in libs/gi-types/src/project-apps.ts:45
-Defined in libs/gi-types/src/project-apps.ts:27
-Defined in libs/gi-types/src/project-apps.ts:10
-Defined in libs/gi-types/src/project-apps.ts:49
-Defined in libs/gi-types/src/project-apps.ts:41
-Defined in libs/gi-types/src/project-apps.ts:51
+
 GiraffeStateAttr
 Interface GiraffeStateAttr
 ####### Index
 Properties
-Defined in libs/iframe-sdk/src/lib/iframe-sdk.ts:65
-Defined in libs/iframe-sdk/src/lib/iframe-sdk.ts:71
-Defined in libs/iframe-sdk/src/lib/iframe-sdk.ts:83
-Defined in libs/iframe-sdk/src/lib/iframe-sdk.ts:111
-Defined in libs/iframe-sdk/src/lib/iframe-sdk.ts:74
-Defined in libs/iframe-sdk/src/lib/iframe-sdk.ts:80
-Defined in libs/iframe-sdk/src/lib/iframe-sdk.ts:69
-Defined in libs/iframe-sdk/src/lib/iframe-sdk.ts:82
-Defined in libs/iframe-sdk/src/lib/iframe-sdk.ts:68
-Defined in libs/iframe-sdk/src/lib/iframe-sdk.ts:75
-Defined in libs/iframe-sdk/src/lib/iframe-sdk.ts:77
-Defined in libs/iframe-sdk/src/lib/iframe-sdk.ts:72
-Defined in libs/iframe-sdk/src/lib/iframe-sdk.ts:76
-Defined in libs/iframe-sdk/src/lib/iframe-sdk.ts:70
-Defined in libs/iframe-sdk/src/lib/iframe-sdk.ts:73
-Defined in libs/iframe-sdk/src/lib/iframe-sdk.ts:67
-Defined in libs/iframe-sdk/src/lib/iframe-sdk.ts:81
-Defined in libs/iframe-sdk/src/lib/iframe-sdk.ts:84
-Defined in libs/iframe-sdk/src/lib/iframe-sdk.ts:106
-Defined in libs/iframe-sdk/src/lib/iframe-sdk.ts:116
+
+
 LensableDataStyle
 Interface LensableDataStyle
 ####### Index
 Properties
 opt-in to show specific columns.
-Defined in libs/gi-types/src/kanbans.ts:140
-Defined in libs/gi-types/src/kanbans.ts:153
-Defined in libs/gi-types/src/kanbans.ts:141
-Defined in libs/gi-types/src/kanbans.ts:159
-Defined in libs/gi-types/src/kanbans.ts:142
-Defined in libs/gi-types/src/kanbans.ts:143
-Defined in libs/gi-types/src/kanbans.ts:154
-Defined in libs/gi-types/src/kanbans.ts:144
-Defined in libs/gi-types/src/kanbans.ts:152
-Defined in libs/gi-types/src/kanbans.ts:155
+
 LensableDisplayStyle
 Interface LensableDisplayStyle
 ####### Index
@@ -467,64 +404,18 @@ paint and layout properties documented at https://docs.mapbox.com/style-spec/ref
 paint and layout properties documented at https://docs.mapbox.com/style-spec/reference/layers/#line
 paint properties documented at https://docs.mapbox.com/style-spec/reference/layers/#model
 LensableDisplayStyle
-Defined in libs/gi-types/src/kanbans.ts:177
-Defined in libs/gi-types/src/kanbans.ts:187
-Defined in libs/gi-types/src/kanbans.ts:184
-Defined in libs/gi-types/src/kanbans.ts:208
-Defined in libs/gi-types/src/kanbans.ts:207
-Defined in libs/gi-types/src/kanbans.ts:199
-Defined in libs/gi-types/src/kanbans.ts:181
-Defined in libs/gi-types/src/kanbans.ts:188
-Defined in libs/gi-types/src/kanbans.ts:189
-Defined in libs/gi-types/src/kanbans.ts:205
-Defined in libs/gi-types/src/kanbans.ts:206
-Defined in libs/gi-types/src/kanbans.ts:211
-Defined in libs/gi-types/src/kanbans.ts:212
-Defined in libs/gi-types/src/kanbans.ts:193
-Defined in libs/gi-types/src/kanbans.ts:195
-Defined in libs/gi-types/src/kanbans.ts:194
-Defined in libs/gi-types/src/kanbans.ts:179
-Defined in libs/gi-types/src/kanbans.ts:180
-Defined in libs/gi-types/src/kanbans.ts:227
-Defined in libs/gi-types/src/kanbans.ts:217
-Defined in libs/gi-types/src/kanbans.ts:219
-Defined in libs/gi-types/src/kanbans.ts:223
-Defined in libs/gi-types/src/kanbans.ts:225
-Defined in libs/gi-types/src/kanbans.ts:221
-Defined in libs/gi-types/src/kanbans.ts:229
-Defined in libs/gi-types/src/kanbans.ts:201
-Defined in libs/gi-types/src/kanbans.ts:213
-Defined in libs/gi-types/src/kanbans.ts:202
-Defined in libs/gi-types/src/kanbans.ts:192
-Defined in libs/gi-types/src/kanbans.ts:232
-Defined in libs/gi-types/src/kanbans.ts:231
-Defined in libs/gi-types/src/kanbans.ts:200
-Defined in libs/gi-types/src/kanbans.ts:233
-Defined in libs/gi-types/src/kanbans.ts:203
-Defined in libs/gi-types/src/kanbans.ts:204
+
 NumericalPalette
 Interface NumericalPalette
 ####### Index
 Properties
 TODO deprecate - could keep paletteId as record
-Defined in libs/gi-types/src/kanbans.ts:86
-Defined in libs/gi-types/src/kanbans.ts:96
-Defined in libs/gi-types/src/kanbans.ts:91
-Defined in libs/gi-types/src/kanbans.ts:90
-Defined in libs/gi-types/src/kanbans.ts:89
-Defined in libs/gi-types/src/kanbans.ts:87
-Defined in libs/gi-types/src/kanbans.ts:88
+
 ProjectLayer
 Interface ProjectLayer
 ####### Index
 Properties
-Defined in libs/gi-types/src/layers.ts:188
-Defined in libs/gi-types/src/layers.ts:192
-Defined in libs/gi-types/src/layers.ts:194
-Defined in libs/gi-types/src/layers.ts:191
-Defined in libs/gi-types/src/layers.ts:190
-Defined in libs/gi-types/src/layers.ts:189
-Defined in libs/gi-types/src/layers.ts:193
+
 (Additional interfaces like TreeData, View, LayerConfigOptions are listed in the Table of Contents; refer to their respective links for details if available.)
 Types
 ...(All types as in original doc: ColorPaletteOrFixed, FeatureId, etc. - Note: The provided gi-nx-condensed.md does not contain detailed descriptions for Types. Refer to the Table of Contents for links to specific type definitions if available.)...

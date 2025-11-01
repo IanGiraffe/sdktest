@@ -3,6 +3,7 @@ import { setupTabs } from './ui/tabs.js';
 import { functionCatalog } from './automation/functionCatalog.js';
 import { setupAutomationPanel } from './automation/setupAutomation.js';
 import { displayOutput } from './ui/ui.js';
+import { renderSdkModules, setupFunctionSearch } from './ui/moduleButtons.js';
 
 let giraffeState;
 let rpc;
@@ -33,6 +34,16 @@ function bindManualButtons(context) {
 
         button.addEventListener('click', async () => {
             try {
+                // Mark this button as active within its panel (by output target)
+                if (fn.outputId) {
+                    const outputEl = document.getElementById(fn.outputId);
+                    const panel = outputEl ? outputEl.closest('.tab-content') : null;
+                    if (panel) {
+                        Array.from(panel.querySelectorAll('button:not(.copy-btn).active-output')).forEach(b => b.classList.remove('active-output'));
+                        // Avoid marking copy buttons
+                        if (!button.classList.contains('copy-btn')) button.classList.add('active-output');
+                    }
+                }
                 const data = await fn.invoke(context);
                 if (fn.outputId) {
                     displayOutput(fn.outputId, data);
@@ -69,6 +80,8 @@ async function initializeApp(context) {
     setupAnalytics(context.rpc);
     automationController = setupAutomationPanel(context);
     initializeListeners(context.giraffeState);
+    renderSdkModules(context);
+    setupFunctionSearch();
     console.log('Giraffe SDK Test App initialized');
 }
 
@@ -80,7 +93,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         console.log('SDK not loaded - make sure this app is running within Giraffe iframe');
         document.body.innerHTML = `
             <div style="padding: 20px; text-align: center; font-family: Arial;">
-                <h2>Giraffe SDK Test App</h2>
+                <div>Giraffe SDK Test App</div>
                 <p>This app only works when loaded as an iframe within Giraffe.</p>
                 <p>To use this app:</p>
                 <ol style="text-align: left; display: inline-block;">

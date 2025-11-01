@@ -12,21 +12,25 @@ body {
 }
 .tabs {
     display: flex;
-    gap: 8px;
+    gap: 6px;
     border-bottom: 1px solid #e5e7eb;
     padding-bottom: 8px;
     margin-bottom: 16px;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    align-items: flex-end;
 }
 .tab {
     background: #e9eef3;
     color: #1f2a37;
     border: none;
-    padding: 8px 12px;
+    padding: 6px 10px;
     margin: 0;
     border-radius: 6px 6px 0 0;
     cursor: pointer;
     font-weight: 600;
+    flex: 0 0 auto;
+    white-space: nowrap;
 }
 .tab:hover {
     background: #d8e3ec;
@@ -37,6 +41,48 @@ body {
 }
 .tab-content { display: none; }
 .tab-content.active { display: block; }
+
+/* Button grid for SDK function lists */
+.button-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+/* Function search */
+.function-search {
+    margin: 6px 0 10px;
+}
+.function-search input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 8px 10px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 14px;
+}
+.function-search-results {
+    margin-top: 6px;
+    max-height: 220px;
+    overflow-y: auto;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    background: #fff;
+    padding: 6px;
+}
+.function-search-results.hidden { display: none; }
+.function-search-results .result-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+.function-search-results .result-item:hover { background: #f1f5f9; }
+.function-search-results .result-name { font-weight: 600; color: #111827; }
+.function-search-results .result-module { font-size: 12px; color: #6b7280; }
 
 button {
     background: #007cba;
@@ -56,6 +102,22 @@ button.secondary {
 }
 button.secondary:hover {
     background: #4b5563;
+}
+/* Active/last-invoked function button */
+button.active-output {
+    background: #16a34a;
+}
+button.active-output:hover {
+    background: #15803d;
+}
+button:disabled {
+    background: #9ca3af;
+    color: #f3f4f6;
+    cursor: not-allowed;
+    opacity: 0.85;
+}
+button:disabled:hover {
+    background: #9ca3af;
 }
 .output {
     background: #f8f9fa;
@@ -232,9 +294,14 @@ button.secondary:hover {
     }
     .tabs {
         gap: 4px;
+        flex-wrap: nowrap;
+        overflow-x: auto;
     }
     button {
         width: 100%;
+    }
+    .tabs .tab {
+        width: auto;
     }
     .automation-controls {
         flex-direction: column;

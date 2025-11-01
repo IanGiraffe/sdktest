@@ -9,7 +9,7 @@ This project is designed to explore and improve the Giraffe SDK documentation. T
 ```
 C:\Dev\Apps\sdktest\
 ├── giraffe_docs\
-│   ├── current_docs.md     # Existing Giraffe SDK documentation
+│   ├── docs-condensed.md     # Existing Giraffe SDK documentation
 │   └── new_docs.md         # Enhanced documentation being built
 ├── app.js                  # Test application for SDK exploration
 └── CLAUDE.md              # This file (project instructions)

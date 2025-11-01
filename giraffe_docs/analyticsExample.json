@@ -1,0 +1,92 @@
+{
+  "grouped": {},
+  "rows": [],
+  "orphans": {},
+  "groupKeys": {},
+  "allGroupKeys": {},
+  "stackedSectionResult": {
+      "asArray": [
+          {
+              "type": "Feature",
+              "properties": {
+                  "type": "buildingSection",
+                  "color": "#1c426d",
+                  "stroke": "#6a6a6a",
+                  "hardCost": 50,
+                  "efficiency": 0,
+                  "facadeCost": 0,
+                  "strokeWidth": 2,
+                  "floorToFloor": 3.2,
+                  "sellEfficiency": 0,
+                  "usage": "Core",
+                  "id": "4GIZOMzQ9YbEDADJc7Ud_",
+                  "appId": "1",
+                  "levels": 4,
+                  "public": true,
+                  "projectId": "63860",
+                  "stackOrder": 0,
+                  "layerId": "default",
+                  "apartmentIndex": 0,
+                  "buildingID": "4GIZOMzQ9YbEDADJc7Ud_",
+                  "_baseHeightDatum": "0",
+                  "ix": 0,
+                  "perimeter": 22.408220253311804,
+                  "area": 23.167496661004407,
+                  "grossArea": 92.66998664401763,
+                  "grossBuildingArea": 92.66998664401763,
+                  "netArea": 0,
+                  "saleableArea": 0,
+                  "_layerOpacity": 1,
+                  "_fillOpacity": 1,
+                  "_strokeOpacity": 1,
+                  "_buildingID": "4GIZOMzQ9YbEDADJc7Ud_",
+                  "_isBaseSection": true,
+                  "_height": 12.8,
+                  "_baseHeight": 0,
+                  "_baseElevation": 0,
+                  "_stackOrder": 0,
+                  "_isTopOfStack": true,
+                  "FEET_1___height": 41.9947506561664,
+                  "METERS_1___height": 12.8,
+                  "FEET_1___baseHeight": 0,
+                  "METERS_1___baseHeight": 0,
+                  "FEET_2__area": 249.37285863845432,
+                  "METERS_2__area": 23.167496661004407,
+                  "FEET_2__grossArea": 997.4914345538173,
+                  "METERS_2__grossArea": 92.66998664401763,
+                  "FEET_2__netArea": 0,
+                  "METERS_2__netArea": 0,
+                  "FEET_2__grossBuildingArea": 997.4914345538173,
+                  "METERS_2__grossBuildingArea": 92.66998664401763,
+                  "FEET_2__saleableArea": 0,
+                  "METERS_2__saleableArea": 0,
+                  "FEET_1__perimeter": 73.51778298330368,
+                  "METERS_1__perimeter": 22.408220253311804,
+                  "FEET_1__floorToFloor": 10.4986876640416,
+                  "METERS_1__floorToFloor": 3.2
+              },
+              "_projected": [
+                  [
+                      [...coordinates...]
+                  ]
+              ],
+              "geometry": {
+                  "type": "Polygon",
+                  "coordinates": [
+                      [...coordinates...]
+                  ]
+              }
+          },
+          {
+              "type": "Feature",
+              "properties": { ... },
+              "_path": ".children[1].children[0]"
+          }
+      }
+  },
+  "siteData": {
+      "__byGroup": true,
+      "data": {}
+  },
+  "isNoData": true
+}

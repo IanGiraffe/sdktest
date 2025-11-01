@@ -955,3 +955,72 @@ if (result?.status?.state === 'succeeded') {
 - State vs RPC: use `giraffeState.get(...)` for instantaneous reads of the current app state; use `rpc.invoke(...)` for operations that query, compute, or mutate through the host.
 - Bounds formats: when working with `mapView.bounds`, handle both object and array forms as above.
 - Data layers: contents and availability depend on project configuration and permissions; not all layers are directly queryable.
+
+## rpc: `getLassoedLensedFeatures`
+
+### `getLassoedLensedFeatures`
+- **Usage**: `await rpc.invoke('getLassoedLensedFeatures', [])`
+- **Returns**: Promise<Lensable[]> — GeoJSON Feature objects intersecting the current lasso selection, enriched with lens attributes when a lens is active.
+
+#### Description
+Returns features within the user’s current lasso/marquee selection. If a lens context is active, the returned features include lens-derived values in `properties` (e.g., computed metrics, derived fields).
+
+#### Prerequisites
+- Draw a lasso on the map before calling; otherwise the result is typically an empty array.
+- To receive lens attributes, ensure a lens-enabled context is active (e.g., lens layer or layer with lens configuration).
+
+#### Signature
+```ts
+rpc.invoke('getLassoedLensedFeatures', []): Promise<Lensable[]>
+```
+
+#### Return Shape
+```ts
+type Lensable = {
+  id: number | string;
+  tile?: { z: number; x: number; y: number }; // present for tiled/vector sources
+  properties: Record<string, any>;            // layer fields + lens fields (if lens active)
+  geometry: {
+    type: 'Point' | 'LineString' | 'Polygon' | 'MultiPolygon' | string;
+    coordinates: any[];
+  };
+  type: 'Feature';
+};
+```
+
+#### Example Response
+```json
+[
+  {
+    "id": 304721,
+    "tile": { "z": 16, "x": 14978, "y": 26988 },
+    "properties": {
+      "address": "1500 S PLEASANT VALLEY RD",
+      "owner": "BCF 1 LAKESHORE LLC",
+      "parcelnumb": "285503",
+      "parval": 95230000,
+      "usedesc": "APARTMENT 100+",
+      "zoning": "ERC",
+      "zoning_description": "East Riverside Corridor",
+      "city": "austin",
+      "county": "travis",
+      "state2": "TX",
+      "qoz": "No",
+      "ll_bldg_footprint_sqft": 119288,
+      "ll_last_refresh": "2025-09-30T00:00:00.000Z",
+      "ll_updated_at": "2025-10-24T23:17:08.190Z"
+      /* ...additional dataset-specific fields... */
+    },
+    "geometry": {
+      "type": "Polygon",
+      "coordinates": [ [ [ -97.7212643623352, 30.239474612698217 ], [ -97.72029340267181, 30.239012323115972 ] ] ]
+    },
+    "type": "Feature"
+  }
+]
+```
+
+#### Notes and Edge Cases
+- No lasso selection → returns `[]`.
+- Lens inactive → `properties` reflect source layer fields only (no lens-derived attributes).
+- Field schema varies by dataset; code should inspect keys defensively.
