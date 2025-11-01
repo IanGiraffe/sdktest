@@ -1024,3 +1024,181 @@ type Lensable = {
 - No lasso selection → returns `[]`.
 - Lens inactive → `properties` reflect source layer fields only (no lens-derived attributes).
 - Field schema varies by dataset; code should inspect keys defensively.
+
+## rpc: `getLassoedProjectFeatures`
+
+### `getLassoedProjectFeatures`
+- **Usage**: `await rpc.invoke('getLassoedProjectFeatures', [])`
+- **Returns**: Promise<Feature[]> — GeoJSON features from project layers that intersect the current lasso.
+
+#### Description
+Returns the underlying project-layer GeoJSON features that intersect the user’s lasso/marquee selection. Unlike `getLassoedLensedFeatures`, this call does not require an active lens. If a lens happens to be active, returned `properties` may still include lens-derived fields, but they are not required.
+
+#### Prerequisites
+- Run the app inside Giraffe so `rpc` is available (embedded iframe).
+- Draw a lasso on the map before calling; otherwise the result is typically an empty array.
+- No lens requirement (returns raw layer attributes when no lens is active).
+
+#### Signature
+```ts
+rpc.invoke('getLassoedProjectFeatures', []): Promise<Feature[]>
+```
+
+#### Return Shape
+```ts
+type Feature = {
+  id?: number | string;
+  tile?: { z: number; x: number; y: number }; // present for tiled/vector sources
+  properties: Record<string, any>;            // dataset-specific attributes; may include lens fields if lens active
+  geometry: {
+    type: 'Point' | 'LineString' | 'Polygon' | 'MultiPolygon' | string;
+    coordinates: any[];
+  };
+  type: 'Feature';
+};
+```
+
+#### Notes and Edge Cases
+- No lasso selection → returns `[]`.
+- Without lens, `properties` contains only source layer attributes.
+- Attribute schema varies by dataset; consume defensively.
+
+## rpc: `getLassoShape`
+
+### `getLassoShape`
+- **Usage**: `await rpc.invoke('getLassoShape', [])`
+- **Returns**: Promise<Feature> — GeoJSON Feature representing the current lasso polygon.
+
+#### Description
+Returns the geometry of the lasso/marquee drawn by the user as a GeoJSON Feature. Useful for using the selection geometry as a boundary in subsequent operations.
+
+#### Prerequisites
+- Run inside Giraffe so `rpc` is available.
+- Draw a lasso on the map before calling; otherwise it may return `null`/empty depending on host implementation.
+
+#### Signature
+```ts
+rpc.invoke('getLassoShape', []): Promise<Feature>
+```
+
+#### Return Shape
+```ts
+type Feature = {
+  type: 'Feature';
+  properties: Record<string, any>; // commonly includes { stackOrder: number }
+  geometry: {
+    type: 'Polygon';
+    coordinates: number[][][]; // standard GeoJSON polygon ring coordinates
+  };
+};
+```
+
+#### Example Response (truncated)
+```json
+{
+  "type": "Feature",
+  "properties": { "stackOrder": 0 },
+  "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+      [
+        [ -97.72058683135394, 30.239310979894896 ],
+        [ -97.72059097076185, 30.239312948245896 ],
+        [ -97.72059924957772, 30.239317... ]
+      ]
+    ]
+  }
+}
+```
+
+#### Notes
+- If no lasso is active, result may be `null`/empty.
+- Use as a spatial boundary for querying or visualization (e.g., pass to a temp layer or use for filtering).
+
+## rpc: `getSelectableProjectFeatures`
+
+### `getSelectableProjectFeatures`
+- **Usage**: `await rpc.invoke('getSelectableProjectFeatures', [])`
+- **Returns**: Promise<Feature[]> — all selectable project GeoJSON features (across layers configured as selectable).
+
+#### Description
+Returns all project-layer features that are marked/selectable in the current project context. This does not require a lasso selection and can span multiple selectable layers.
+
+#### Prerequisites
+- Run inside Giraffe so `rpc` is available.
+- Project must have one or more layers configured as selectable; otherwise an empty array may be returned.
+
+#### Signature
+```ts
+rpc.invoke('getSelectableProjectFeatures', []): Promise<Feature[]>
+```
+
+#### Return Shape
+```ts
+type Feature = {
+  id?: number | string;
+  tile?: { z: number; x: number; y: number };
+  properties: Record<string, any>; // dataset-specific attributes per layer
+  geometry: {
+    type: 'Point' | 'LineString' | 'Polygon' | 'MultiPolygon' | string;
+    coordinates: any[];
+  };
+  type: 'Feature';
+};
+```
+
+#### Notes and Edge Cases
+- May return a large array depending on project size; filter client-side or prefer lassoed calls for subsets.
+- Schema varies by dataset; handle attributes defensively.
+
+## rpc: `getUserDrawnPolygon`
+
+### `getUserDrawnPolygon`
+- **Usage**: `await rpc.invoke('getUserDrawnPolygon', [])`
+- **Returns**: Promise<Feature> — GeoJSON Feature polygon drawn by the user via a guided drawing interaction.
+
+#### Description
+Similar to `getLassoShape`, but instead of a freehand lasso, the user explicitly draws a polygon. The call resolves with the resulting polygon as a GeoJSON Feature.
+
+#### Prerequisites
+- Run inside Giraffe so `rpc` is available.
+- User must complete the polygon drawing interaction; cancelation may return `null` depending on host behavior.
+
+#### Signature
+```ts
+rpc.invoke('getUserDrawnPolygon', []): Promise<Feature>
+```
+
+#### Return Shape
+```ts
+type Feature = {
+  type: 'Feature';
+  properties: Record<string, any>; // commonly includes { stackOrder: number }
+  geometry: {
+    type: 'Polygon';
+    coordinates: number[][][];
+  };
+};
+```
+
+#### Example Response (truncated)
+```json
+{
+  "type": "Feature",
+  "properties": { "stackOrder": 0 },
+  "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+      [
+        [ -97.72140973886472, 30.239720922282658 ],
+        [ -97.72192036366431, 30.239884518854325 ],
+        [ -97.7219..., 30.2398... ]
+      ]
+    ]
+  }
+}
+```
+
+#### Notes
+- If the user cancels drawing, result may be `null`/empty.
+- Use the returned polygon for filtering, analysis, or temporary layer visualization.
